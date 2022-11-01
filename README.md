@@ -1,2 +1,3 @@
-# github-actions
-GitHub Actions samples.
+# GitHub Action Tips & Tricks
+Some nice tips & tricks
+
