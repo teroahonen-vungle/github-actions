@@ -5,7 +5,7 @@ jobs:
   service-container:
     # You must use a Linux environment when using service containers or container jobs
     runs-on: ubuntu-latest
-    container: alpline:latest
+    container: alpine:latest
     services:
       redis:
         image: redis
