@@ -1,14 +1,22 @@
-name: Clean artifacts
+name: Jobs and steps
 on:
-  schedule:
-    - cron: '0 0 1 * *'
   workflow_dispatch:
 jobs:
-  remove-old-artifacts:
+  create-and-list:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-    - name: Remove old artifacts
-      uses: c-hive/gha-remove-artifacts@v1
-      with:
-        age: '5 minutes' # '<number> <unit>', parsed by Moment.js
+    - name: Create file
+      run: |
+        touch /tmp/file.txt
+    - name: List file
+      run: |
+        ls -la /tmp/file.txt
+
+  list:
+    runs-on: ubuntu-latest
+    steps:
+    - name: List file
+      run: |
+        ls -la /tmp/file.txt
+
+
