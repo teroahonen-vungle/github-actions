@@ -1,5 +1,8 @@
 name: Jobs and steps
 on:
+  push:
+    branches:
+      - foobar
   workflow_dispatch:
 jobs:
   create-and-list:
