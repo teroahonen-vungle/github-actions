@@ -5,6 +5,7 @@ jobs:
   service-container:
     # You must use a Linux environment when using service containers or container jobs
     runs-on: ubuntu-latest
+    container: alpline:latest
     services:
       redis:
         image: redis
@@ -13,5 +14,5 @@ jobs:
     steps:
       - name: Test redis
         run: |
-          curl -w '\n' http://redis:6379/ping
+          ping -c 5 -W 2 redis
 
