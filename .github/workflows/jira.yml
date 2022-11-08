@@ -1,0 +1,14 @@
+name: Start deployment
+on:
+  repository_dispatch:
+    # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
+    types: ["trigger-deployment"]
+jobs:
+  receiver-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Print JIRA ticket number and environment
+        run: |
+          echo JIRA number is ${{ github.event.client_payload.issue }}
