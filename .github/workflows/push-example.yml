@@ -20,7 +20,6 @@ jobs:
           conftest: 0.28.3
           kubeconform: 0.4.12
           command: |
-              mkdir manifests
               echo "Run conftest"
               helmv3 template example/helm/example | conftest test -p .github/files/base.rego -
               echo "Run kubeval"
