@@ -21,7 +21,7 @@ jobs:
           kubeconform: 0.4.12
           command: |
               mkdir manifests
-              helm template example/helm --output-dir ./manifests | conftest test -p .github/files/base.rego -
+              helm template example/helm/example --output-dir ./manifests | conftest test -p .github/files/base.rego -
       - name: Run kube-linter
         if: always()
         uses: stackrox/kube-linter-action@v1.0.4
