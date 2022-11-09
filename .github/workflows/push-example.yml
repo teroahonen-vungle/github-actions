@@ -27,6 +27,7 @@ jobs:
               echo "Run kubeval"
               helmv3 template example/helm/example | kubeval --strict
       - name: Create manifests
+        if: always()
         run: |
           mkdir manifests
           helm template example/helm/example --output-dir manifests
