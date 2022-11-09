@@ -14,7 +14,6 @@ jobs:
         with:
           kubectl: 1.23.0
           kustomize: 4.4.1
-          helm: 2.17.0
           helmv3: 3.7.2
           kubeseal: 0.16.0
           kubeval: v0.16.1
@@ -23,9 +22,9 @@ jobs:
           command: |
               mkdir manifests
               echo "Run conftest"
-              helm template example/helm/example | conftest test -p .github/files/base.rego -
+              helmv3 template example/helm/example | conftest test -p .github/files/base.rego -
               echo "Run kubeval"
-              helm template example/helm/example | kubeval --strict --additional-schema-locations https://raw.githubusercontent.com/adobe-platform/kubernetes-json-schema/master
+              helmv3 template example/helm/example | kubeval --strict --additional-schema-locations https://raw.githubusercontent.com/adobe-platform/kubernetes-json-schema/master
       - name: Create manifests
         if: always()
         run: |
