@@ -12,8 +12,9 @@ jobs:
       - name: Run conftest
         uses: stefanprodan/kube-tools@v1
         with:
-          kubectl: 1.22.0
+          kubectl: 1.23.0
           kustomize: 4.4.1
+          helm: 2.17.0
           helmv3: 3.7.2
           kubeseal: 0.16.0
           kubeval: v0.16.1
@@ -21,7 +22,14 @@ jobs:
           kubeconform: 0.4.12
           command: |
               mkdir manifests
-              helm template example/helm/example --output-dir ./manifests | conftest test -p .github/files/base.rego -
+              echo "Run conftest"
+              helm template example/helm/example | conftest test -p .github/files/base.rego -
+              echo "Run kubeval"
+              helmv3 template example/helm/example | kubeval --strict
+      - name: Create manifests
+        run: |
+          mkdir manifests
+          helm template example/helm/example --output-dir manifests
       - name: Run kube-linter
         if: always()
         uses: stackrox/kube-linter-action@v1.0.4
