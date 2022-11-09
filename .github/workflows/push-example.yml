@@ -25,7 +25,7 @@ jobs:
               echo "Run conftest"
               helm template example/helm/example | conftest test -p .github/files/base.rego -
               echo "Run kubeval"
-              helmv3 template example/helm/example | kubeval --strict
+              helm template example/helm/example | kubeval --strict --additional-schema-locations https://raw.githubusercontent.com/adobe-platform/kubernetes-json-schema/master
       - name: Create manifests
         if: always()
         run: |
