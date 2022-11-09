@@ -1,0 +1,5 @@
+checks:
+  doNotAutoAddDefaults: true
+  addAllBuiltIn: true
+  exclude:
+  - "latest-tag"

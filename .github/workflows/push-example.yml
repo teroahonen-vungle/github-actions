@@ -1,0 +1,48 @@
+name: Start deployment
+on:
+  push:
+    branches:
+      - "*"
+jobs:
+  check-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Run conftest
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.22.0
+          kustomize: 4.4.1
+          helmv3: 3.7.2
+          kubeseal: 0.16.0
+          kubeval: v0.16.1
+          conftest: 0.28.3
+          kubeconform: 0.4.12
+          command: |
+              echo "Run conftest"
+              mkdir manifests
+              helm template example/helm --output ./manifests | conftest test -p .github/files/base.rego -
+      - name: Run kube-linter
+        if: always()
+        uses: stackrox/kube-linter-action@v1.0.4
+        with:
+          directory: manifests
+          config: .github/files/kube-linter.yaml
+          format: plain
+          output-file: kubelinter.log
+      - name: Save kubelinter output as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: kubelinter.log
+          path: kubelinter.log
+  check-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Docker hadolint
+        uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: ./example/docker/Dockerfile
