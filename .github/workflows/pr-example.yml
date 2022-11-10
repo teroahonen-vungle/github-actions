@@ -2,9 +2,10 @@ name: Pull request
 on:
   pull_request:
     branches:
-    - 'main'
+      - 'main'
     paths:
-    - '!example/helm/example/*.md'
+      - '**'
+      - '!example/helm/example/*.md'
 jobs:
   get-version:
     runs-on: ubuntu-latest

@@ -2,11 +2,12 @@ name: Push code
 on:
   push:
     branches:
-      - '*'
-      - "!main"
+      - '**'
+      - '!main'
     paths:
-    - '*'
-    - '!example/helm/example/*.md'
+      - '**'
+      - '!example/helm/example/*.md'
+
 jobs:
   check-helm:
     runs-on: ubuntu-latest
