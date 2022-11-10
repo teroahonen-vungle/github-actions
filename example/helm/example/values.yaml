@@ -2,6 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+namespace: rollout-demo
 replicaCount: 10
 
 image:
