@@ -1,4 +1,4 @@
-name: Start deployment
+name: Pull request
 on:
   pull_request:
     branches:
@@ -64,6 +64,7 @@ jobs:
       - name: Print version
         run: |
           echo ${{ needs.get-version.outputs.version }}
+
       - name: yq - portable yaml processor
         uses: mikefarah/yq@v4.29.2
       - name: Update Chart.yaml
@@ -108,7 +109,7 @@ jobs:
         if: steps.changes.outputs.helm == 'true'
         id: short_version
         run: |
-          echo "version=$(${{ needs.get-version.outputs.version }} | cut -d'-' -f 1)" >> $GITHUB_OUTPUT
+          echo "version=$(echo ${{ needs.get-version.outputs.version }} | cut -d'-' -f 1)" >> $GITHUB_OUTPUT
       - name: Update Chart.yaml for docs
         if: steps.changes.outputs.helm == 'true'
         run: |

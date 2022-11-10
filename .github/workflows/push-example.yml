@@ -1,4 +1,4 @@
-name: Start deployment
+name: Push
 on:
   push:
     branches:
