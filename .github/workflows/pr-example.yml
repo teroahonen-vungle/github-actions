@@ -2,7 +2,7 @@ name: Start deployment
 on:
   pull_request:
     branches:
-    - 'master'
+    - main'
 jobs:
   test-helm:
     runs-on: ubuntu-latest
