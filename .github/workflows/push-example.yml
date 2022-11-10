@@ -1,8 +1,13 @@
 name: Push code
 on:
   push:
+    branches:
+      - '**'
+      - '!main'
     paths:
+      - '**'
       - '!example/helm/example/*.md'
+
 jobs:
   check-helm:
     runs-on: ubuntu-latest
