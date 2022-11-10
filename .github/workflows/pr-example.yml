@@ -50,9 +50,9 @@ jobs:
           node_image: kindest/node:${{ matrix.k8s }}
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.0.1
-      - name: Add bitnami repo
-        run: helm repo add bitnami https://charts.bitnami.com/bitnami
-      - name: Add elastic repo
-        run: helm repo add elastic https://helm.elastic.co
+      #- name: Add bitnami repo
+      #  run: helm repo add bitnami https://charts.bitnami.com/bitnami
+      #- name: Add elastic repo
+      #  run: helm repo add elastic https://helm.elastic.co
       - name: Run chart-testing (lint-andd-install)
-        run: ct lint-and-install --chart-dirs=example/helm/example --charts example/helm/example --target-branch=master --debug=true --helm-extra-args="--timeout 300s"
+        run: ct install --chart-dirs=example/helm/example --charts example/helm/example --target-branch=master --debug=true --helm-extra-args="--timeout 300s"

@@ -29,6 +29,10 @@ jobs:
         run: |
           mkdir manifests
           helm template example/helm/example --output-dir manifests
+      - name: Setup chart testing
+        uses: helm/chart-testing-action@v2.0.1
+      - name: Run chart-testing (lint)
+        run: ct lint --chart-dirs=example/helm/example --charts example/helm/example --target-branch=main --debug=true --helm-extra-args="--timeout 300s"
       - name: Run kube-linter
         if: always()
         uses: stackrox/kube-linter-action@v1.0.4
