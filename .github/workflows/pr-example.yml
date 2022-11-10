@@ -64,7 +64,7 @@ jobs:
         run: |
           echo ${{ needs.get-version.outputs.version }}
       - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.28.1
+        uses: mikefarah/yq@v4.29.2
       - name: Update Chart.yaml
         run: |
           yq -i e '.version = "${{ needs.get-version.outputs.version }}",.appVersion = "${{ needs.get-version.outputs.version }}"' ./example/helm/example/Chart.yaml
