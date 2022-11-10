@@ -10,6 +10,7 @@ on:
 env:
   CHART_DIR: example/helm/example
   CHART: example
+  REPO: charts/example
 
 jobs:
   get-info:
@@ -69,11 +70,12 @@ jobs:
           helm package ${{env.CHART_DIR}}
           helm push ${{env.CHART}}-${{ needs.get-info.outputs.version }}.tgz oci://$REGISTRY/charts
 
-      - name: Tag chart with commit id
+      - name: Add extra tags to the chart
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          skopeo copy oci://$REGISTRY/charts/${{env.CHART}}:${{ needs.get-info.outputs.version }} oci://oci://$REGISTRY/charts/${{env.CHART}}:${{ needs.get-info.outputs.version }}-${{ needs.get-info.outputs.commit-id}}
+          MANIFEST=$(aws ecr batch-get-image --repository-name ${{ env.REPO }} --image-ids imageTag=${{ needs.get-info.outputs.version }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
+          aws ecr put-image --repository-name ${{ env.REPO }} --image-tag ${{ needs.get-info.outputs.version }}-${{ needs.get-info.outputs.commit-id }} --image-manifest "$MANIFEST"
   publish-image:
     name: Publish container image
     runs-on: ubuntu-latest
