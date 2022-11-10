@@ -19,6 +19,8 @@ jobs:
       version: ${{ steps.release.outputs.version }}
       commit-id: ${{ steps.commit-id.outputs.sha_short }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Get release
         id: release
         run: |
