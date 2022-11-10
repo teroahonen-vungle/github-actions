@@ -4,3 +4,4 @@ checks:
   exclude:
   - "latest-tag"
   - "dangling-service"
+  - "use-namespace"
