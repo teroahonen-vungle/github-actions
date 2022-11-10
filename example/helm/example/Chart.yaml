@@ -2,7 +2,7 @@ apiVersion: v2
 name: example
 description: Helm chart for rollouts example
 maintainers:
-  - name: Tero Ahonen
+  - name: teroahonen-vungle
     email: tahonen@liftoff.io
 
 # A chart can be either an 'application' or a 'library' chart.
