@@ -1,10 +1,11 @@
-name: Push
+name: Push code
 on:
   push:
     branches:
-      - "**"
+      - '*'
       - "!main"
     paths:
+    - '*'
     - '!example/helm/example/*.md'
 jobs:
   check-helm:
