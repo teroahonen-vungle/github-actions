@@ -4,6 +4,7 @@ metadata:
   name: {{ include "example.fullname" . }}
   labels:
     {{- include "example.labels" . | nindent 4 }}
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
