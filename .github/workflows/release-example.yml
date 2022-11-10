@@ -35,22 +35,27 @@ jobs:
     needs:
     - get-info
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
       - run: echo ${{ steps.login-ecr.outputs.registry }}
       - name: Package and push helm chart to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           helm package ${{env.CHART_DIR}}
-          helm push example-${{ needs.get-info.outputs.version }}.tgz oci://$REGISTRY/charts
+          helm push ${{env.CHART}}-${{ needs.get-info.outputs.version }}.tgz oci://$REGISTRY/charts
       - name: Tag chart with commit id
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           skopeo copy oci://$REGISTRY/charts/${{env.CHART}}:${{ needs.get-info.outputs.version }} oci://oci://$REGISTRY/charts/${{env.CHART}}:${{ needs.get-info.outputs.version }}-${{ needs.get-info.outputs.commit-id}}
   publish-image:
