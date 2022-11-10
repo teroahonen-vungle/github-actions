@@ -45,7 +45,6 @@ jobs:
           tags: |
             teroahonen/rollout:${{needs.get-version.outputs.version}}
 
-
   test-helm:
     runs-on: ubuntu-latest
     needs:
@@ -87,3 +86,49 @@ jobs:
       #  run: helm repo add elastic https://helm.elastic.co
       - name: Run chart-testing (install)
         run: ct install --chart-dirs=example/helm/example --charts example/helm/example --target-branch=main --debug=true --helm-extra-args="--timeout 300s"
+  helm-docs:
+    runs-on: ubuntu-latest
+    env:
+      CHART_DIR: example/helm/example
+    needs:
+    - get-version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Check if docs need update
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            helm:
+             - 'example/helm/**'
+      - name: Create short version
+        if: steps.changes.outputs.helm == 'true'
+        id: short_version
+        run: |
+          echo "version=$(${{ needs.get-version.outputs.version }} | cut -d'-' -f 1)" >> $GITHUB_OUTPUT
+      - name: Update Chart.yaml for docs
+        if: steps.changes.outputs.helm == 'true'
+        run: |
+          yq -i e '.version = "${{ steps.short_version.outputs.version }}",.appVersion = "${{ steps.short_version.outputs.version }}"' ${{env.CHART_DIR}}/Chart.yaml
+      - name: Update image.tag for docs
+        if: steps.changes.outputs.helm == 'true'
+        run: |
+          yq -i e '.image.tag = "${{ steps.short_version.outputs.version }}"' ${{env.CHART_DIR}}/values.yaml
+
+      - name: Update docs
+        if: steps.changes.outputs.helm == 'true'
+        run: |
+          chmod +x ./.github/helm-docs.sh
+          ./.github/helm-docs.sh ${{env.CHART_DIR}}
+
+      - name: Commit doc changes
+        if: steps.changes.outputs.helm == 'true'
+        run: |
+          git fetch --all
+          git checkout ${{github.head_ref}}
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add charts/sigmund/*
+          git commit -m "Update charts version and docs" --allow-empty
+          git push -f origin ${{github.head_ref}}
