@@ -103,4 +103,37 @@ jobs:
           platforms: linux/amd64
           tags: |
             teroahonen/rollout:${{needs.get-info.outputs.version}}
+  deploy-to-staging:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    needs:
+    - get-info
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: deploy
+          persist-credentials: true
+          repository: Vungle/PE
+          token: ${{secrets.GH_TOKEN }}
+          fetch-depth: 0
+      - name: List files
+        run: |
+          ls -la apps
+      - name: yq - portable yaml processor
+        uses: mikefarah/yq@v4.29.2
+      - name: Update chart versions
+        run: |
+          yq -i e '.spec.source.targetRevision = "${{ needs.get-info.outputs.version }}"' ./apps/api/example-staging-app.yml
+      - name: Commit version update changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ./apps/api/*
+          git commit -m "Update chart version to ${{ needs.get-info.outputs.version }}" --allow-empty
+          git push -f origin deploy
+
+
+
+
 
