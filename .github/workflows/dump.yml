@@ -1,5 +1,8 @@
 name: Dump GitHub context
-on: push
+on:
+  push:
+    branches:
+      - "dump"
 jobs:
   one:
     runs-on: ubuntu-latest
