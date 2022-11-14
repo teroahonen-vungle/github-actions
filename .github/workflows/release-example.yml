@@ -158,4 +158,4 @@ jobs:
           'Deploy example version ${{ needs.get-info.outputs.version }}'
         description: |
           'Deploy example version ${{ needs.get-info.outputs.version }}'
-        fields: '{"components":"Example","customfield_13773": "Infrastructure", "customfield_13780": "tero.ahonen@vungle.com", "customfield_13806": "tero.ahonen@vungle.com", "customfield_13899": "2.0.0", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"example", "customfield_13904":"Traffic interval", "customfield_13905":"Traffic state",  "customfield_13906":"Traffic step", "customfield_13907":"Traffic target","customfield_13908":"2022-11-14T02:00+02:00"}'
+        fields: '{"components":["Example"],"customfield_13773": "Infrastructure", "customfield_13780": "tero.ahonen@vungle.com", "customfield_13806": ["tero.ahonen@vungle.com"], "customfield_13899": "2.0.0", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"example", "customfield_13904":"Traffic interval", "customfield_13905":"Traffic state",  "customfield_13906":"Traffic step", "customfield_13907":"Traffic target","customfield_13908":"2022-11-14T02:00+02:00"}'
