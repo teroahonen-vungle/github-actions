@@ -51,5 +51,3 @@ jobs:
           git add ./apps/api/*
           git commit -m "Update chart version to ${{ github.event.client_payload.to_version }}" --allow-empty
           git push -f origin deploy
-        working-directory: pe
-
