@@ -26,10 +26,6 @@ jobs:
     needs:
     - init
     steps:
-      - name: Checkout App
-        uses: actions/checkout@v3
-        with:
-          path: app
       - name: Checkout PE
         uses: actions/checkout@v3
         with:
@@ -38,10 +34,6 @@ jobs:
           repository: Vungle/PE
           token: ${{secrets.GH_TOKEN }}
           fetch-depth: 0
-          path: pe
-      - name: List files
-        run: |
-          ls -la pe/apps
       - name: yq - portable yaml processor
         uses: mikefarah/yq@v4.29.2
       - name: Update chart versions
