@@ -18,7 +18,11 @@ jobs:
   start-deployment:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout App
+        uses: actions/checkout@v3
+        with:
+          path: /tmp/app
+      - name: Checkout PE
         uses: actions/checkout@v3
         with:
           ref: deploy
@@ -28,12 +32,13 @@ jobs:
           fetch-depth: 0
       - name: List files
         run: |
-          ls -la apps
+          ls -la pe/apps
       - name: yq - portable yaml processor
         uses: mikefarah/yq@v4.29.2
       - name: Update chart versions
         run: |
-          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./$(yq '.${{github.event.client_payload.service}}.appfile_prod' deployment-mapping.yml)
+          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./$(yq '.${{github.event.client_payload.service}}.appfile_prod' /tmp/app/deployment-mapping.yml)
+
       - name: Commit version update changes
         run: |
           git config --local user.email "action@github.com"
@@ -41,4 +46,21 @@ jobs:
           git add ./apps/api/*
           git commit -m "Update chart version to ${{ github.event.client_payload.to_version }}" --allow-empty
           git push -f origin deploy
-
+  update-jira:
+    runs-on: ubuntu-latest
+    name: Create DEPLOY ticket
+    needs:
+    - start-deployment
+    steps:
+    - name: Login
+      id: login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+    - name: Transition issue
+      uses: atlassian/gajira-transition@master
+      with:
+        issue: ${{ github.event.client_payload.issue }}
+        transition: "DEPLOYMENT IN PROGRESS"
