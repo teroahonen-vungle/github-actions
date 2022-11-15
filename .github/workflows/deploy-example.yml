@@ -11,6 +11,8 @@ jobs:
     outputs:
       app_file_path: ${{ steps.get_path.outputs.path }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Print JIRA ticket number and environment
         run: |
           echo Ticket ${{ github.event.client_payload.issue }}
