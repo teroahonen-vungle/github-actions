@@ -30,6 +30,7 @@ jobs:
           repository: Vungle/PE
           token: ${{secrets.GH_TOKEN }}
           fetch-depth: 0
+          path: pe
       - name: List files
         run: |
           ls -la pe/apps
@@ -37,7 +38,7 @@ jobs:
         uses: mikefarah/yq@v4.29.2
       - name: Update chart versions
         run: |
-          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./app/deployment-mapping.yml)
+          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./pe/$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./app/deployment-mapping.yml)
 
       - name: Commit version update changes
         run: |
@@ -46,6 +47,7 @@ jobs:
           git add ./apps/api/*
           git commit -m "Update chart version to ${{ github.event.client_payload.to_version }}" --allow-empty
           git push -f origin deploy
+        working-directory: pe
   update-jira:
     runs-on: ubuntu-latest
     name: Create DEPLOY ticket
