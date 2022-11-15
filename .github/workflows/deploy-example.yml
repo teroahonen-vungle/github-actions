@@ -6,8 +6,10 @@ on:
     types: ["trigger-deployment"]
   workflow_dispatch:
 jobs:
-  print-event-data:
+  init:
     runs-on: ubuntu-latest
+    outputs:
+      app_file_path: ${{ steps.get_path.outputs.path }}
     steps:
       - name: Print JIRA ticket number and environment
         run: |
@@ -15,8 +17,14 @@ jobs:
           echo Ticket ID ${{ github.event.client_payload.issue_id }}
           echo Version ${{ github.event.client_payload.to_version }}
           echo Service ${{ github.event.client_payload.service }}
+      - name: Get file path
+        id: get_path
+        run: |
+          echo "path=$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./deployment-mapping.yml" >> $GITHUB_OUTPUT
   start-deployment:
     runs-on: ubuntu-latest
+    needs:
+    - init
     steps:
       - name: Checkout App
         uses: actions/checkout@v3
@@ -38,7 +46,7 @@ jobs:
         uses: mikefarah/yq@v4.29.2
       - name: Update chart versions
         run: |
-          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./pe/$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./app/deployment-mapping.yml)
+          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ${{needs.init.outputs.app_file_path}}
 
       - name: Commit version update changes
         run: |
@@ -48,21 +56,4 @@ jobs:
           git commit -m "Update chart version to ${{ github.event.client_payload.to_version }}" --allow-empty
           git push -f origin deploy
         working-directory: pe
-  update-jira:
-    runs-on: ubuntu-latest
-    name: Create DEPLOY ticket
-    needs:
-    - start-deployment
-    steps:
-    - name: Login
-      id: login
-      uses: atlassian/gajira-login@master
-      env:
-        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-    - name: Transition issue
-      uses: atlassian/gajira-transition@master
-      with:
-        issue: ${{ github.event.client_payload.issue }}
-        transition: "DEPLOYMENT IN PROGRESS"
+
