@@ -53,7 +53,7 @@ jobs:
           git push -f origin deploy
   update-jira:
     runs-on: ubuntu-latest
-    name: Create DEPLOY ticket
+    name: Update ticket state
     needs:
     - start-deployment
     steps:
@@ -68,4 +68,4 @@ jobs:
       uses: atlassian/gajira-transition@master
       with:
         issue: ${{ github.event.client_payload.issue }}
-        transition: "DEPLOYMENT IN PROGRESS"
+        transition: Deployment Started
