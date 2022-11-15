@@ -21,7 +21,7 @@ jobs:
       - name: Checkout App
         uses: actions/checkout@v3
         with:
-          path: /tmp/app
+          path: app
       - name: Checkout PE
         uses: actions/checkout@v3
         with:
@@ -37,7 +37,7 @@ jobs:
         uses: mikefarah/yq@v4.29.2
       - name: Update chart versions
         run: |
-          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./$(yq '.${{github.event.client_payload.service}}.appfile_prod' /tmp/app/deployment-mapping.yml)
+          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ./$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./app/deployment-mapping.yml)
 
       - name: Commit version update changes
         run: |
