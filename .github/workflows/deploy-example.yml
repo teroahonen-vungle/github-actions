@@ -22,7 +22,7 @@ jobs:
       - name: Get file path
         id: get_path
         run: |
-          echo "path=$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./deployment-mapping.ym)" >> $GITHUB_OUTPUT
+          echo "path=$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./deployment-mapping.yml)" >> $GITHUB_OUTPUT
   start-deployment:
     runs-on: ubuntu-latest
     needs:
