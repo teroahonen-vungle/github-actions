@@ -1,0 +1,3 @@
+example:
+  appfile_staging: apps/api/example-staging-app.yml
+  appfile_prod: apps/api/example-app.yml
