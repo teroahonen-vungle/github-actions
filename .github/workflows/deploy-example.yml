@@ -51,3 +51,21 @@ jobs:
           git add ./apps/api/*
           git commit -m "Update chart version to ${{ github.event.client_payload.to_version }}" --allow-empty
           git push -f origin deploy
+  update-jira:
+    runs-on: ubuntu-latest
+    name: Create DEPLOY ticket
+    needs:
+    - start-deployment
+    steps:
+    - name: Login
+      id: login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+    - name: Transition issue
+      uses: atlassian/gajira-transition@master
+      with:
+        issue: ${{ github.event.client_payload.issue }}
+        transition: "DEPLOYMENT IN PROGRESS"
