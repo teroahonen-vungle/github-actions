@@ -1,4 +1,4 @@
-name: 'Create release'
+name: 'Deploy release'
 # Controls when the action will run.
 on:
   repository_dispatch:
