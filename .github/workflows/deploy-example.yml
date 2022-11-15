@@ -1,8 +1,10 @@
-name: Start deployment
+name: 'Create release'
+# Controls when the action will run.
 on:
   repository_dispatch:
     # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
     types: ["trigger-deployment"]
+  workflow_dispatch:
 jobs:
   receiver-webhook:
     runs-on: ubuntu-latest
@@ -11,4 +13,11 @@ jobs:
         uses: actions/checkout@v3
       - name: Print JIRA ticket number and environment
         run: |
-          echo JIRA number is ${{ github.event.client_payload.issue }}
+          echo Ticket ${{ github.event.client_payload.issue }}
+          echo Ticket ID ${{ github.event.client_payload.issue_id }}
+          echo Version ${{ github.event.client_payload.to_version }}
+          echo Service ${{ github.event.client_payload.service }}
+
+
+
+

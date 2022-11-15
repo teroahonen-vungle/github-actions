@@ -155,7 +155,7 @@ jobs:
         project: DEPLOY
         issuetype: 'Standard Tech Deployment'
         summary: |
-          'Deploy example version ${{ needs.get-info.outputs.version }}'
+          Deploy example version ${{ needs.get-info.outputs.version }}
         description: |
-          'Deploy example version ${{ needs.get-info.outputs.version }}'
+          Deploy example version ${{ needs.get-info.outputs.version }}
         fields: '{"components":[{"name":"Example"}],"customfield_13773": [{"value":"Infrastructure"}], "customfield_13780": "Release revenue impact", "customfield_13806": [{"accountId":"60b0f6152ec5ce0070ac5370"}], "customfield_13899": "2.0.0", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"example", "customfield_13904":"Traffic interval", "customfield_13905":"Traffic state",  "customfield_13906":"Traffic step", "customfield_13907":"Traffic target","customfield_13908":"2022-11-14T02:00+02:00"}'
