@@ -126,7 +126,7 @@ jobs:
         uses: mikefarah/yq@v4.29.2
       - name: Update chart versions
         run: |
-          yq -i e '.spec.source.targetRevision = "${{ needs.get-info.outputs.version }}"' ./apps/api/example-staging-app.yml
+          yq -i e '.spec.source.targetRevision = "${{ needs.get-info.outputs.version }}"' ./apps/example/example-staging-app.yml
       - name: Commit version update changes
         run: |
           git config --local user.email "action@github.com"
