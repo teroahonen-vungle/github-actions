@@ -1,0 +1,9 @@
+component: Example
+release_revenue_impact: Release revune impact
+team: Infrastructure
+to_po_validation_account_id: 60b0f6152ec5ce0070ac5370
+service: example
+traffic_interval: Traffic interval
+traffic_state: Traffic state
+traffic_step: 20%
+traffic_target: 100%

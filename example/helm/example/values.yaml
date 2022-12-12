@@ -1,6 +1,7 @@
 # Default values for example.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+ticket: DEPLOY-1234
 replicaCount: 10
 image:
   repository: teroahonen/rollout

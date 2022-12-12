@@ -1,0 +1,72 @@
+name: 'Rollback release'
+# Controls when the action will run.
+on:
+  repository_dispatch:
+    # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
+    types: ["trigger-rollback"]
+  workflow_dispatch:
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    outputs:
+      app_file_path: ${{ steps.get_path.outputs.path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Print JIRA ticket number and environment
+        run: |
+          echo Ticket ${{ github.event.client_payload.issue }}
+          echo Ticket ID ${{ github.event.client_payload.issue_id }}
+          echo Old version ${{ github.event.client_payload.new_version }}
+          echo New version ${{ github.event.client_payload.old_version }}
+          echo Service ${{ github.event.client_payload.service }}
+      - name: yq - portable yaml processor
+        uses: mikefarah/yq@v4.29.2
+      - name: Get file path
+        id: get_path
+        run: |
+          echo "path=$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./deployment-mapping.yml)" >> $GITHUB_OUTPUT
+  start-rollback:
+    runs-on: ubuntu-latest
+    needs:
+    - init
+    steps:
+      - name: Checkout PE
+        uses: actions/checkout@v3
+        with:
+          ref: deploy
+          persist-credentials: true
+          repository: Vungle/PE
+          token: ${{secrets.GH_TOKEN }}
+          fetch-depth: 0
+      - name: yq - portable yaml processor
+        uses: mikefarah/yq@v4.29.2
+      - name: Update chart versions
+        run: |
+          yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.old_version }}"' ${{needs.init.outputs.app_file_path}}
+
+      - name: Commit version update changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ./apps/*
+          git commit -m "Rollback chart version to ${{ github.event.client_payload.old_version }}" --allow-empty
+          git push -f origin deploy
+  update-jira:
+    runs-on: ubuntu-latest
+    name: Update ticket state
+    needs:
+    - start-rollback
+    steps:
+    - name: Login
+      id: login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+    - name: Transition issue
+      uses: atlassian/gajira-transition@master
+      with:
+        issue: ${{ github.event.client_payload.issue }}
+        transition: Rollback Approved

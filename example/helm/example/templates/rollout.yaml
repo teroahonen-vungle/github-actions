@@ -3,6 +3,9 @@ kind: Rollout
 metadata:
   name: {{ include "example.fullname" . }}
   labels:
+    {{- if .Values.ticket }}
+    deployticket: {{ .Values.ticket }}
+    {{- end }}
     {{- include "example.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}

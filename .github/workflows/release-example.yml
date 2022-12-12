@@ -11,6 +11,7 @@ env:
   CHART_DIR: example/helm/example
   CHART: example
   REPO: charts/example
+  SERVICE: example
 
 jobs:
   get-info:
@@ -19,6 +20,7 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
       commit-id: ${{ steps.commit-id.outputs.sha_short }}
+      current-version: ${{steps.current-version.outpouts.current-version}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,11 +32,63 @@ jobs:
         id: commit-id
         run: |
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: deploy
+          persist-credentials: true
+          repository: Vungle/PE
+          token: ${{secrets.GH_TOKEN }}
+          fetch-depth: 0
+          path: pe
+      - name: Get current version
+        id: current-version
+        run: | 
+           echo "current-version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
+  create-deploy-ticket:
+    name: Create DEPLOY ticket
+    needs:
+    - get-info
+    runs-on: ubuntu-latest
+    outputs:
+      ticket: ${{ steps.create.outputs.issue }}
+    steps:
+    - name: Collect data
+      id: ticket-data
+      run: |
+        echo "component=$(yq '.component' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "release_revenue_impact=$(yq '.release_revenue_impact' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "team=$(yq '.team' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "to_po_validation_account_id=$(yq '.to_po_validation_account_id' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "service=$(yq '.service' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "traffic_interval=$(yq '.traffic_interval' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "traffic_state=$(yq '.traffic_state' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "traffic_step=$(yq '.traffic_step' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "traffic_target=$(yq '.traffic_target' deploy-data.yml)" >> $GITHUB_OUTPUT
+    - name: Login
+      id: login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+    - name: Create ticket
+      id: create
+      uses: atlassian/gajira-create@master
+      with:
+        project: DEPLOY
+        issuetype: 'Standard Tech Deployment'
+        summary: |
+          Deploy example version ${{ needs.get-info.outputs.version }}
+        description: |
+          Deploy example version ${{ needs.get-info.outputs.version }}
+        fields: '{"components":[{"name":"${{steps.ticket-data.outputs.component}}"}],"customfield_13773": [{"value":"${{steps.ticket-data.outputs.team}}"}], "customfield_13780": "${{steps.ticket-data.outputs.release_revenue_impact}}", "customfield_13806": [{"accountId":"${{steps.ticket-data.outputs.to_po_validation_account_id}}"}], "customfield_13899": "${{ needs.get-info.outputs.current-version}}", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"${{steps.ticket-data.outputs.service}}", "customfield_13904":"${{steps.ticket-data.outputs.traffic_interval}}", "customfield_13905":"${{steps.ticket-data.outputs.traffic_state}}",  "customfield_13906":"${{steps.ticket-data.outputs.traffic_step}}", "customfield_13907":"${{steps.ticket-data.outputs.traffic_target}}","customfield_13908":"2022-11-14T02:00+02:00"}'
   publish-helm:
     name: Publish Helm chart
     runs-on: ubuntu-latest
     needs:
     - get-info
+    - create-deploy-ticket
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -57,11 +111,15 @@ jobs:
 
       - name: Update Chart.yaml
         run: |
-          yq -i e '.version = "${{ needs.get-info.outputs.version }}",.appVersion = "${{ needs.get-info.outputs.version }}"' ./example/helm/example/Chart.yaml
+          yq -i e '.version = "${{ needs.get-info.outputs.version }}",.appVersion = "${{ needs.get-info.outputs.version }}"' ./${{env.CHART_DIR}}/Chart.yaml
 
       - name: Update image.tag
         run: |
-          yq -i e '.image.tag = "${{ needs.get-info.outputs.version }}"' ./example/helm/example/values.yaml
+          yq -i e '.image.tag = "${{ needs.get-info.outputs.version }}"' ./${{env.CHART_DIR}}/values.yaml
+
+      - name: Update ticket label
+        run: |
+          yq -i e '.ticket = "${{ needs.create-deploy-ticket.outputs.ticket }}"' ./${{env.CHART_DIR}}/values.yaml
 
       - name: Package and push helm chart to Amazon ECR
         env:
@@ -82,6 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
     - get-info
+    - create-deploy-ticket
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -134,28 +193,3 @@ jobs:
           git add ./apps/api/*
           git commit -m "Update chart version to ${{ needs.get-info.outputs.version }}" --allow-empty
           git push -f origin deploy
-  create-deploy-ticket:
-    name: Create DEPLOY ticket
-    needs:
-    - get-info
-    - deploy-to-staging
-    runs-on: ubuntu-latest
-    steps:
-    - name: Login
-      id: login
-      uses: atlassian/gajira-login@master
-      env:
-        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-    - name: Create ticket
-      id: create
-      uses: atlassian/gajira-create@master
-      with:
-        project: DEPLOY
-        issuetype: 'Standard Tech Deployment'
-        summary: |
-          Deploy example version ${{ needs.get-info.outputs.version }}
-        description: |
-          Deploy example version ${{ needs.get-info.outputs.version }}
-        fields: '{"components":[{"name":"Example"}],"customfield_13773": [{"value":"Infrastructure"}], "customfield_13780": "Release revenue impact", "customfield_13806": [{"accountId":"60b0f6152ec5ce0070ac5370"}], "customfield_13899": "2.0.0", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"example", "customfield_13904":"Traffic interval", "customfield_13905":"Traffic state",  "customfield_13906":"Traffic step", "customfield_13907":"Traffic target","customfield_13908":"2022-11-14T02:00+02:00"}'
