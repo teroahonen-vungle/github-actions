@@ -13,6 +13,7 @@ env:
   REPO: charts/example
   SERVICE: example
   DEPLOY_DATA: deploy-data.yml
+  DEPLOY_MAPPING_FILE: ./pe/apps/deployment-mapping.yml
 
 jobs:
   get-info:
@@ -21,7 +22,9 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
       commit-id: ${{ steps.commit-id.outputs.sha_short }}
-      current-version: ${{ steps.current-version.outputs.current_version }}
+      current_version: ${{steps.current-version.outputs.current-version}}
+      app_file_prod: ${{steps.app_file_prod.outputs.app_file_prod}}
+      app_file_stage: ${{steps.app_file_stage.outputs.app_file_stage}}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -42,7 +45,169 @@ jobs:
           token: ${{secrets.GH_TOKEN }}
           fetch-depth: 0
           path: pe
+      - name: Get stage app file path
+        id: app_file_stage
+        run: |
+          echo "app_file_stage=$(yq '.${{env.SERVICE}}.appfile_stage' ${{env.DEPLOY_MAPPING_FILE}})"  >> $GITHUB_OUTPUT
+      - name: Get prod app file path
+        id: app_file_prod
+        run: |
+          echo "app_file_prod=$(yq '.${{env.SERVICE}}.appfile_prod' ${{env.DEPLOY_MAPPING_FILE}})" >> $GITHUB_OUTPUT
       - name: Get current version
         id: current-version
         run: | 
-           echo "current_version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
+           echo "current_version=$(yq '.spec.template.spec.source.targetRevision' pe/${{steps.app_file_prod.outputs.app_file_prod}}" >> $GITHUB_OUTPUT
+ 
+  create-deploy-ticket:
+    name: Create DEPLOY ticket
+    needs:
+    - get-info
+    runs-on: ubuntu-latest
+    outputs:
+      ticket: ${{ steps.create.outputs.issue }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Collect data
+      id: ticket-data
+      run: |
+        echo "component=$(yq '.component' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "release_revenue_impact=$(yq '.release_revenue_impact' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "team=$(yq '.team' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "to_po_validation_account_id=$(yq '.to_po_validation_account_id' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "service=$(yq '.service' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_interval=$(yq '.traffic_interval' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_state=$(yq '.traffic_state' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_step=$(yq '.traffic_step' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_target=$(yq '.traffic_target' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+    - name: Login
+      id: login
+      uses: atlassian/gajira-login@master
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+    - name: Debug ticket payload
+      run: |
+        echo '{"components":[{"name":"${{steps.ticket-data.outputs.component}}"}],"customfield_13773": [{"value":"${{steps.ticket-data.outputs.team}}"}], "customfield_13780": "${{steps.ticket-data.outputs.release_revenue_impact}}", "customfield_13806": [{"accountId":"${{steps.ticket-data.outputs.to_po_validation_account_id}}"}], "customfield_13899": "${{ needs.get-info.outputs.current-version}}", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"${{steps.ticket-data.outputs.service}}", "customfield_13904":"${{steps.ticket-data.outputs.traffic_interval}}", "customfield_13905":"${{steps.ticket-data.outputs.traffic_state}}",  "customfield_13906":"${{steps.ticket-data.outputs.traffic_step}}", "customfield_13907":"${{steps.ticket-data.outputs.traffic_target}}","customfield_13908":"2022-11-14T02:00+02:00"}'
+    - name: Create ticket
+      id: create
+      uses: atlassian/gajira-create@master
+      with:
+        project: DEPLOY
+        issuetype: 'Standard Tech Deployment'
+        summary: |
+          Deploy example version ${{ needs.get-info.outputs.version }}
+        description: |
+          Deploy example version ${{ needs.get-info.outputs.version }}
+        fields: '{"components":[{"name":"${{steps.ticket-data.outputs.component}}"}],"customfield_13773": [{"value":"${{steps.ticket-data.outputs.team}}"}], "customfield_13780": "${{steps.ticket-data.outputs.release_revenue_impact}}", "customfield_13806": [{"accountId":"${{steps.ticket-data.outputs.to_po_validation_account_id}}"}], "customfield_13899": "${{ needs.get-info.outputs.current-version}}", "customfield_13900":"${{ needs.get-info.outputs.version }}", "customfield_13901":"${{steps.ticket-data.outputs.service}}", "customfield_13904":"${{steps.ticket-data.outputs.traffic_interval}}", "customfield_13905":"${{steps.ticket-data.outputs.traffic_state}}",  "customfield_13906":"${{steps.ticket-data.outputs.traffic_step}}", "customfield_13907":"${{steps.ticket-data.outputs.traffic_target}}","customfield_13908":"2022-11-14T02:00+02:00"}'
+  publish-helm:
+    name: Publish Helm chart
+    runs-on: ubuntu-latest
+    needs:
+    - get-info
+    - create-deploy-ticket
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - run: echo ${{ steps.login-ecr.outputs.registry }}
+
+#      - name: yq - portable yaml processor
+#        uses: mikefarah/yq@v4.29.2
+
+      - name: Update Chart.yaml
+        run: |
+          yq -i e '.version = "${{ needs.get-info.outputs.version }}",.appVersion = "${{ needs.get-info.outputs.version }}"' ./${{env.CHART_DIR}}/Chart.yaml
+
+      - name: Update image.tag
+        run: |
+          yq -i e '.image.tag = "${{ needs.get-info.outputs.version }}"' ./${{env.CHART_DIR}}/values.yaml
+
+      - name: Update ticket label
+        run: |
+          yq -i e '.ticket = "${{ needs.create-deploy-ticket.outputs.ticket }}"' ./${{env.CHART_DIR}}/values.yaml
+
+      - name: Package and push helm chart to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          helm package ${{env.CHART_DIR}}
+          helm push ${{env.CHART}}-${{ needs.get-info.outputs.version }}.tgz oci://$REGISTRY/charts
+
+      - name: Add extra tags to the chart
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          MANIFEST=$(aws ecr batch-get-image --repository-name ${{ env.REPO }} --image-ids imageTag=${{ needs.get-info.outputs.version }} --output json | jq --raw-output --join-output '.images[0].imageManifest')
+          echo $MANIFEST
+          aws ecr put-image --repository-name ${{ env.REPO }} --image-tag ${{ needs.get-info.outputs.version }}-${{ needs.get-info.outputs.commit-id }} --image-manifest-media-type 'application/vnd.oci.image.manifest.v1+json' --image-manifest $MANIFEST
+  publish-image:
+    name: Publish container image
+    runs-on: ubuntu-latest
+    needs:
+    - get-info
+    - create-deploy-ticket
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          logout: false
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./example/docker
+          push: true
+          file: ./example/docker/Dockerfile
+          platforms: linux/amd64
+          tags: |
+            teroahonen/rollout:${{needs.get-info.outputs.version}}
+  deploy-to-staging:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    needs:
+    - get-info
+    - publish-image
+    - publish-helm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: deploy
+          persist-credentials: true
+          repository: Vungle/PE
+          token: ${{secrets.GH_TOKEN }}
+          fetch-depth: 0
+      - name: List files
+        run: |
+          ls -la apps
+      - name: yq - portable yaml processor
+        uses: mikefarah/yq@v4.29.2
+      - name: Update chart versions
+        run: |
+          yq -i e '.spec.source.targetRevision = "${{ needs.get-info.outputs.version }}"' ${{ needs.get-info.outputs.app_file_stage }}
+      - name: Commit version update changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ./apps/api/*
+          git commit -m "Update chart version to ${{ needs.get-info.outputs.version }}" --allow-empty
+          git push -f origin deploy
