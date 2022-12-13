@@ -124,9 +124,6 @@ jobs:
 
       - run: echo ${{ steps.login-ecr.outputs.registry }}
 
-#      - name: yq - portable yaml processor
-#        uses: mikefarah/yq@v4.29.2
-
       - name: Update Chart.yaml
         run: |
           yq -i e '.version = "${{ needs.get-info.outputs.version }}",.appVersion = "${{ needs.get-info.outputs.version }}"' ./${{env.CHART_DIR}}/Chart.yaml
