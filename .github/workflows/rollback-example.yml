@@ -5,6 +5,8 @@ on:
     # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
     types: ["trigger-rollback"]
   workflow_dispatch:
+env:
+  DEPLOY_MAPPING_FILE: ./deployment-mapping.yml
 jobs:
   init:
     runs-on: ubuntu-latest
@@ -20,12 +22,11 @@ jobs:
           echo Old version ${{ github.event.client_payload.new_version }}
           echo New version ${{ github.event.client_payload.old_version }}
           echo Service ${{ github.event.client_payload.service }}
-      - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.29.2
+
       - name: Get file path
         id: get_path
         run: |
-          echo "path=$(yq '.${{github.event.client_payload.service}}.appfile_prod' ./deployment-mapping.yml)" >> $GITHUB_OUTPUT
+          echo "path=$(yq '.${{github.event.client_payload.service}}.appfile_prod' ${{env.DEPLOY_MAPPING_FILE}})" >> $GITHUB_OUTPUT
   start-rollback:
     runs-on: ubuntu-latest
     needs:
