@@ -42,8 +42,8 @@ jobs:
           token: ${{secrets.GH_TOKEN }}
           fetch-depth: 0
           path: pe
-      - name: yq - portable yaml processor
-        uses: mikefarah/yq@v4.29.2
+#      - name: yq - portable yaml processor
+#        uses: mikefarah/yq@v4.29.2
       - name: Get current version
         id: current-version
         run: | 
@@ -51,3 +51,4 @@ jobs:
            ls -la pe/apps/example
            yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml
            echo "current_version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
+           echo $GITHUB_OUTPUT
