@@ -56,7 +56,7 @@ jobs:
       - name: Get current version
         id: current-version
         run: | 
-           echo "current_version=$(yq '.spec.template.spec.source.targetRevision' pe/${{steps.app_file_prod.outputs.app_file_prod}}" >> $GITHUB_OUTPUT
+           echo "current_version=$(yq '.spec.template.spec.source.targetRevision' pe/${{steps.app_file_prod.outputs.app_file_prod}}}" >> $GITHUB_OUTPUT
  
   create-deploy-ticket:
     name: Create DEPLOY ticket
