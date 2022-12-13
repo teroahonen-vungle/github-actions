@@ -42,9 +42,12 @@ jobs:
           token: ${{secrets.GH_TOKEN }}
           fetch-depth: 0
           path: pe
+      - name: yq - portable yaml processor
+        uses: mikefarah/yq@v4.29.2
       - name: Get current version
         id: current-version
         run: | 
+           echo yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml
            echo "current-version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
   create-deploy-ticket:
     name: Create DEPLOY ticket
@@ -54,6 +57,8 @@ jobs:
     outputs:
       ticket: ${{ steps.create.outputs.issue }}
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: Collect data
       id: ticket-data
       run: |
