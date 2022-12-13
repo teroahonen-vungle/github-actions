@@ -12,6 +12,7 @@ env:
   CHART: example
   REPO: charts/example
   SERVICE: example
+  DEPLOY_DATA: deploy-data.yml
 
 jobs:
   get-info:
@@ -56,15 +57,15 @@ jobs:
     - name: Collect data
       id: ticket-data
       run: |
-        echo "component=$(yq '.component' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "release_revenue_impact=$(yq '.release_revenue_impact' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "team=$(yq '.team' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "to_po_validation_account_id=$(yq '.to_po_validation_account_id' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "service=$(yq '.service' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "traffic_interval=$(yq '.traffic_interval' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "traffic_state=$(yq '.traffic_state' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "traffic_step=$(yq '.traffic_step' deploy-data.yml)" >> $GITHUB_OUTPUT
-        echo "traffic_target=$(yq '.traffic_target' deploy-data.yml)" >> $GITHUB_OUTPUT
+        echo "component=$(yq '.component' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "release_revenue_impact=$(yq '.release_revenue_impact' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "team=$(yq '.team' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "to_po_validation_account_id=$(yq '.to_po_validation_account_id' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "service=$(yq '.service' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_interval=$(yq '.traffic_interval' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_state=$(yq '.traffic_state' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_step=$(yq '.traffic_step' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
+        echo "traffic_target=$(yq '.traffic_target' ${{env.DEPLOY_DATA}})" >> $GITHUB_OUTPUT
     - name: Login
       id: login
       uses: atlassian/gajira-login@master
