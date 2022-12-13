@@ -1,3 +1,3 @@
 example:
-  appfile_staging: apps/api/example-staging-app.yml
-  appfile_prod: apps/api/example-app.yml
+  appfile_staging: apps/example/example-staging-app.yml
+  appfile_prod: apps/example/example-prod-appset.yml

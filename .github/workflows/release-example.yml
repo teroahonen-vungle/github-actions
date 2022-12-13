@@ -48,7 +48,7 @@ jobs:
       - name: Get stage app file path
         id: app_file_stage
         run: |
-          echo "app_file_stage=$(yq '.${{env.SERVICE}}.appfile_stage' ${{env.DEPLOY_MAPPING_FILE}})"  >> $GITHUB_OUTPUT
+          echo "app_file_stage=$(yq '.${{env.SERVICE}}.appfile_staging' ${{env.DEPLOY_MAPPING_FILE}})"  >> $GITHUB_OUTPUT
       - name: Get prod app file path
         id: app_file_prod
         run: |
