@@ -49,5 +49,5 @@ jobs:
         run: | 
            ls -la pe/apps
            ls -la pe/apps/example
-           echo yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml
+           yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml
            echo "current-version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
