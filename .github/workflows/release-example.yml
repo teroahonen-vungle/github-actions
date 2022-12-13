@@ -22,7 +22,7 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
       commit-id: ${{ steps.commit-id.outputs.sha_short }}
-      current_version: ${{steps.current-version.outputs.current-version}}
+      current_version: ${{steps.current-version.outputs.current_version}}
       app_file_prod: ${{steps.app_file_prod.outputs.app_file_prod}}
       app_file_stage: ${{steps.app_file_stage.outputs.app_file_stage}}
     steps:
