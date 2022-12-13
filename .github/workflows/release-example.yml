@@ -21,7 +21,7 @@ jobs:
     outputs:
       version: ${{ steps.release.outputs.version }}
       commit-id: ${{ steps.commit-id.outputs.sha_short }}
-      current-version: ${{steps.current-version.outpouts.current-version}}
+      current-version: ${{ steps.current-version.outpouts.current_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,4 +50,4 @@ jobs:
            ls -la pe/apps
            ls -la pe/apps/example
            yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml
-           echo "current-version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
+           echo "current_version=$(yq '.spec.template.spec.source.targetRevision' pe/apps/example/example-prod-appset.yml)" >> $GITHUB_OUTPUT
