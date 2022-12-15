@@ -45,7 +45,7 @@ jobs:
       - name: Update chart versions
         run: |
           yq -i e '.spec.template.spec.source.targetRevision = "${{ github.event.client_payload.to_version }}"' ${{needs.init.outputs.app_file_path}}
-          yq -i e '.spec.template.spec.source.helm.parameters = [{"name": "ticket", "value": "${{ github.event.client_payload.issue }}"},{"name":"image.tag","value":"${{ github.event.client_payload.to_version }}"}]' apps/example/example-staging-app-from-git.yml
+          yq -i e '.spec.template.spec.source.helm.parameters = [{"name": "ticket", "value": "${{ github.event.client_payload.issue }}"},{"name":"image.tag","value":"${{ github.event.client_payload.to_version }}"}]' ${{needs.init.outputs.app_file_path}}
 
       - name: Commit version update changes
         run: |
