@@ -12,8 +12,7 @@ metadata:
     notifications.argoproj.io/subscribe.on-rollout-updated.messages: ""
     notifications.argoproj.io/subscribe.on-rollout-completed.messages: ""
     notifications.argoproj.io/subscribe.on-rollout-paused.messages: ""
-    notifications.argoproj.io/subscribe.on-scaling-replica-set.message: ""
-    
+    notifications.argoproj.io/subscribe.on-scaling-replica-set.messages: ""
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
