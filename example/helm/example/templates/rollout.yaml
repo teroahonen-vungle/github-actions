@@ -8,10 +8,12 @@ metadata:
     {{- end }}
     {{- include "example.labels" . | nindent 4 }}
   annotations:
-    notifications.argoproj.io/subscribe.on-rollout-step-completed.messages: ""
     notifications.argoproj.io/subscribe.on-rollout-aborted.messages: ""
+    notifications.argoproj.io/subscribe.on-rollout-updated.messages: ""
     notifications.argoproj.io/subscribe.on-rollout-completed.messages: ""
-    notifications.argoproj.io/subscribe.on-rollout-paused.message: ""
+    notifications.argoproj.io/subscribe.on-rollout-paused.messages: ""
+    notifications.argoproj.io/subscribe.on-scaling-replica-set.message: ""
+    
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
