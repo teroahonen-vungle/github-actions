@@ -43,3 +43,8 @@ autoscaling:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+notifications:
+  notifications.argoproj.io/subscribe.on-rollout-aborted.messages: ""
+  notifications.argoproj.io/subscribe.on-rollout-updated.messages: ""
+  notifications.argoproj.io/subscribe.on-rollout-completed.messages: ""
+  notifications.argoproj.io/subscribe.on-rollout-paused.messages: ""
