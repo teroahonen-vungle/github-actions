@@ -17,23 +17,9 @@ jobs:
         run: echo "Change ticket status"
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Create Pull Request
-        id: pr
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{secrets.GH_TOKEN}}
-          commit-message: Deployment ${{env.ticket}}
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          branch: deployment-${{env.ticket}}
-          title: ${{ env.service }} release ${{ env.version}}}
-          body: |
-            Deploy ticket: ${{ env.ticket }} 
-            Service: ${{ env.service }} 
-            Version: ${{ env.version}}}
-          labels: |
-            ${{ env.service }}
-            deployment
-          delete-branch: true
+      - name: Create PR
+        run: | 
+          gh pr create -B main -H action-test --title '${{ env.service }} release ${{ env.version}}' --body 'Deploy ticket: ${{ env.ticket }} \nService: ${{ env.service }} \nVersion: ${{ env.version}}'
+
 
         
