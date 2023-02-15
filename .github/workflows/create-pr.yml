@@ -1,0 +1,33 @@
+name: Dump GitHub context
+on:
+  push:
+    branches:
+      - "action-test"
+env:
+  ticket_transition: true
+  service: jaeger
+  version: v1.257.0
+  ticket: DEPLOY-1234
+jobs:
+  one:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transistion ticket if true
+        if: ${{ env.ticket_transition == 'true'}}
+        run: echo "Change ticket status"
+      - name: Create Pull Request
+        id: pr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{secrets.GH_TOKEN}}
+          committer: actions@github.com
+          author: Deployment automation
+          title: ${{ env.service }} release ${{ env.version}}}
+          body: |
+            Deploy ticket:  ${{ env.ticket }} 
+            Service: ${{ env.service }} 
+            Version: ${{ env.version}}}
+          labels: ${{ env.service }}, deployment
+          delete-branch: true
+
+        
