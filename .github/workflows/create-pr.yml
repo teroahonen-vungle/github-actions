@@ -24,7 +24,6 @@ jobs:
           token: ${{secrets.GH_TOKEN}}
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          branch: action-test
           base: main
           title: ${{ env.service }} release ${{ env.version}}}
           body: |
