@@ -1,4 +1,4 @@
-name: Dump GitHub context
+name: PR Creation
 on:
   push:
     branches:
