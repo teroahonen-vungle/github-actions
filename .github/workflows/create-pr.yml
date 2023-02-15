@@ -26,7 +26,6 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: deployment-${{env.ticket}}
-          base: main
           title: ${{ env.service }} release ${{ env.version}}}
           body: |
             Deploy ticket: ${{ env.ticket }} 
