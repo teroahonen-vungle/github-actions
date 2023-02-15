@@ -25,6 +25,7 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: action-test
+          base: main
           title: ${{ env.service }} release ${{ env.version}}}
           body: |
             Deploy ticket: ${{ env.ticket }} 
@@ -33,6 +34,6 @@ jobs:
           labels: |
             ${{ env.service }}
             deployment
-          delete-branch: true
+          delete-branch: false
 
         
