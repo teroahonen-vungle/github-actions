@@ -19,7 +19,6 @@ jobs:
         id: pr
         uses: peter-evans/create-pull-request@v4
         with:
-          token: ${{secrets.GH_TOKEN}}
           committer: actions@github.com
           author: Deployment automation
           title: ${{ env.service }} release ${{ env.version}}}
