@@ -26,6 +26,6 @@ jobs:
           Service: ${{ env.service }}
           Version: ${{ env.version}}
           EOF
-          gh pr create -B main -H action-test --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt
+          gh pr create -B main -H action-test --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt -l ${{env.service}} -l deployment
 
 
