@@ -18,8 +18,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Create PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: | 
           gh pr create -B main -H action-test --title '${{ env.service }} release ${{ env.version}}' --body 'Deploy ticket: ${{ env.ticket }} \nService: ${{ env.service }} \nVersion: ${{ env.version}}'
 
 
-        
