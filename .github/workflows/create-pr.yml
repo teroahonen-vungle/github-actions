@@ -21,11 +21,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: | 
-          cat << EOF > body.txt
+          cat << EOF > /tmp/body.txt
           Deploy ticket: ${{ env.ticket }}
           Service: ${{ env.service }}
           Version: ${{ env.version}}
           EOF
-          gh pr create -B main -H action-test --title '${{ env.service }} release ${{ env.version}}' -F body.txt
+          gh pr create -B main -H action-test --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt
 
 
