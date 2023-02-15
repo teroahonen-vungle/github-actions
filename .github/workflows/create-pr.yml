@@ -20,14 +20,16 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           token: ${{secrets.GH_TOKEN}}
-          committer: actions@github.com
-          author: Deployment automation
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           title: ${{ env.service }} release ${{ env.version}}}
           body: |
             Deploy ticket:  ${{ env.ticket }} 
             Service: ${{ env.service }} 
             Version: ${{ env.version}}}
-          labels: ${{ env.service }}, deployment
+          labels: |
+            ${{ env.service }}
+            deployment
           delete-branch: true
 
         
