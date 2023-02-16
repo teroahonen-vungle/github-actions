@@ -22,6 +22,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: | 
           version=$(echo ${{ env.version}} | sed 's/\./-/g')
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git checkout -b deployment-${{ env.service }}-$version
           touch test.txt
           git add test.txt
