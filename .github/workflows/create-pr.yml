@@ -24,7 +24,7 @@ jobs:
           version=$(echo ${{ env.version}} | sed 's/\./-/g')
           git checkout -b deployment-${{ env.service }}-$version
           touch test.txt
-          git add text.txt
+          git add test.txt
           git commit -m 'Release files'
           git push origin deployment-${{ env.service }}-$version
           cat << EOF > /tmp/body.txt
