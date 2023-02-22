@@ -1,0 +1,17 @@
+name: PR Test
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'version.txt'
+
+jobs:
+  echo-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Echo
+        run: |
+          cat version.txt

@@ -1,0 +1,4 @@
+cat <<EOF > body.txt
+          Deploy ticket: {{ env.ticket }}
+          Service: {{ env.service }}
+          Version: {{ env.version}}

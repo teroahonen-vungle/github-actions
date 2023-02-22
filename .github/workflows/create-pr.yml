@@ -17,22 +17,23 @@ jobs:
         run: echo "Change ticket status"
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Create Pull Request
-        id: pr
-        uses: peter-evans/create-pull-request@v4
-        with:
-          token: ${{secrets.GH_TOKEN}}
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          branch: main
-          title: ${{ env.service }} release ${{ env.version}}}
-          body: |
-            Deploy ticket: ${{ env.ticket }} 
-            Service: ${{ env.service }} 
-            Version: ${{ env.version}}}
-          labels: |
-            ${{ env.service }}
-            deployment
-          delete-branch: true
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: | 
+          version=$(echo ${{ env.version}} | sed 's/\./-/g')
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -b deployment-${{ env.service }}-$version
+          touch test.txt
+          git add test.txt
+          git commit -m 'Release files'
+          git push origin deployment-${{ env.service }}-$version
+          cat << EOF > /tmp/body.txt
+          Deploy ticket: ${{ env.ticket }}
+          Service: ${{ env.service }}
+          Version: ${{ env.version}}
+          EOF
+          gh pr create -B main -H deployment-${{ env.service }}-$version --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt
 
-        
+
