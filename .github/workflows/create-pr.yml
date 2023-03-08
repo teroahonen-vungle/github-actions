@@ -14,17 +14,22 @@ jobs:
     steps:
       - name: checkout master
         uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
       - name: merge
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git checkout -b pr-check
+          git checkout action-test
           git merge -m 'Sync from master' main
           git push
   one:
     runs-on: ubuntu-latest
+    needs:
+    - zero
     steps:
       - name: Transistion ticket if true
         if: ${{ env.ticket_transition == 'true'}}
@@ -50,5 +55,3 @@ jobs:
           Version: ${{ env.version}}
           EOF
           gh pr create -B main -H deployment-${{ env.service }}-$version --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt
-
-
