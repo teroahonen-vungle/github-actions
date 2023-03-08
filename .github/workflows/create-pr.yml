@@ -29,6 +29,8 @@ jobs:
           git push
   one:
     runs-on: ubuntu-latest
+    outputs:
+      pr_name: ${{ steps.create-pr.outputs.pr_name }}
     needs:
     - zero
     steps:
@@ -40,6 +42,7 @@ jobs:
         with:
           ref: action-test       
       - name: Create PR
+        id: create-pr
         env:
           GH_TOKEN: ${{ github.token }}
         run: | 
@@ -58,3 +61,17 @@ jobs:
           Version: ${{ env.version}}
           EOF
           gh pr create -B main -H deployment-${{ env.service }}-$version --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt
+          echo "pr_name=deployment-${{ env.service }}-$version" >> $GITHUB_OUTPUT
+  two:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: preview-pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr review --comment -b 'LGTM' ${{needs.one.outputs.pr_name}}
+          gh pr merge -d -s ${{needs.one.outputs.pr_name}}
