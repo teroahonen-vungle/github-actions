@@ -20,7 +20,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git checkout -b pr-check
+          git checkout pr-check
           git merge -m 'Sync from master' main
           git push
   one:
@@ -43,6 +43,7 @@ jobs:
           echo "foo" >> test.txt
           git add test.txt
           git commit -m 'Release files'
+          git pull
           git push origin deployment-${{ env.service }}-$version
           cat << EOF > /tmp/body.txt
           Deploy ticket: ${{ env.ticket }}
