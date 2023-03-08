@@ -36,6 +36,8 @@ jobs:
         run: echo "Change ticket status"
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: action-test       
       - name: Create PR
         env:
           GH_TOKEN: ${{ github.token }}
