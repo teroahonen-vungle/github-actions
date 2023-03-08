@@ -24,7 +24,7 @@ jobs:
           git status
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git checkout pr-check
+          git checkout action-test
           git merge -m 'Sync from master' main
           git push
   one:
