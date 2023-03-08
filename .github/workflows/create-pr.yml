@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - "action-test"
+  workflow_dispatch:
 env:
   ticket_transition: true
   service: jaeger
