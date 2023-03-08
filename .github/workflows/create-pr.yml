@@ -9,6 +9,20 @@ env:
   version: v1.257.0
   ticket: DEPLOY-1234
 jobs:
+  zero:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+      - name: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -b pr-check
+          git merge -m 'Sync from master' main
+          git push
   one:
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +40,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git checkout -b deployment-${{ env.service }}-$version
           touch test.txt
+          echo "foo" >> test.txt
           git add test.txt
           git commit -m 'Release files'
           git push origin deployment-${{ env.service }}-$version
@@ -35,5 +50,3 @@ jobs:
           Version: ${{ env.version}}
           EOF
           gh pr create -B main -H deployment-${{ env.service }}-$version --title '${{ env.service }} release ${{ env.version}}' -F /tmp/body.txt
-
-
