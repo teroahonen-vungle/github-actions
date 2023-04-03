@@ -76,4 +76,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh pr review --comment -b 'LGTM' ${{needs.one.outputs.pr_name}}
+          gh pr review --approve ${{needs.one.outputs.pr_name}}
           gh pr merge -d -s ${{needs.one.outputs.pr_name}}
