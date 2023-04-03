@@ -5,7 +5,7 @@ on:
       - "dump"
   workflow_dispatch:
 env:
-  SECVICE_NAME_IN_TAG: "true"
+  SECVICE_NAME_IN_TAG: "false"
 jobs:
   one:
     runs-on: ubuntu-latest
