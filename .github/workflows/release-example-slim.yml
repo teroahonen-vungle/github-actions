@@ -1,9 +1,6 @@
 name: 'Deploy a release'
 # Controls when the action will run.
 on:
-  push:
-    branches:
-      - "deploy"
   repository_dispatch:
     # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
     types: ["trigger-deployment"]
