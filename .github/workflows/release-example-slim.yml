@@ -88,5 +88,4 @@ jobs:
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN }}
         run: |
-          gh pr review --approve -b 'I made this, it must be OK.' ${{needs.create-pr-master.outputs.pr_name}}
           gh pr merge --auto -s ${{needs.create-pr-master.outputs.pr_name}}
