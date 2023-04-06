@@ -11,8 +11,27 @@ on:
 env:
   PR_BASE: main
 jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout deploy
+          git merge -m 'Sync from master for deploy' main
+          git push
   start-deployment:
     runs-on: ubuntu-latest
+    needs:
+    - sync
     steps:
       - name: Checkout PE
         uses: actions/checkout@v3
@@ -20,7 +39,7 @@ jobs:
           ref: deploy
       - name: Update chart versions
         run: |
-          echo 'Updating chart versions' >> foobar.txt
+          echo 'Updating chart versions $(date)' >> foobar.txt
 
       - name: Commit version update changes
         run: |
@@ -64,7 +83,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          ref: master
+          ref: main
       - name: approve
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN }}
