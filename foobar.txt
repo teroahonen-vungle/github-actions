@@ -1,1 +1,2 @@
 Updating chart versions
+Updating chart versions $(date)
