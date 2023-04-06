@@ -1,0 +1,92 @@
+name: 'Deploy a release'
+# Controls when the action will run.
+on:
+  push:
+    branches:
+      - "deploy"
+  repository_dispatch:
+    # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
+    types: ["trigger-deployment"]
+  workflow_dispatch:
+env:
+  PR_BASE: main
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout deploy
+          git merge -m 'Sync from master for deploy' main
+          git push
+  start-deployment:
+    runs-on: ubuntu-latest
+    needs:
+    - sync
+    steps:
+      - name: Checkout PE
+        uses: actions/checkout@v3
+        with:
+          ref: deploy
+      - name: Update chart versions
+        run: |
+          echo 'Updating chart versions $(date)' >> foobar.txt
+
+      - name: Commit version update changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add foobar.txt
+          git commit -m "update foobar.txt" --allow-empty
+          git push -f origin deploy
+  create-pr-master:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_name: ${{ steps.create-pr.outputs.pr_name }}
+    name: Create PR to master
+    needs:
+    - start-deployment
+    steps:
+    - name: Checkout PE
+      uses: actions/checkout@v3
+      with:
+        ref: deploy
+    - name: Create PR
+      id: create-pr
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: | 
+        version=$(echo ${{ github.event.client_payload.to_version }} | sed 's/\./-/g')
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        cat << EOF > /tmp/body.txt
+        Deploy ticket: PE-XXX
+        Service: test
+        Version: 1.0
+        EOF
+        gh pr create -B ${{ env.PR_BASE }} -H deploy --title 'test release 1.0' -F /tmp/body.txt
+        echo "pr_name=deploy" >> $GITHUB_OUTPUT
+  merge-pr:
+    runs-on: ubuntu-latest
+    needs:
+    - create-pr-master
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+      - name: approve
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review --approve -b 'I made this, it must be OK.' ${{needs.create-pr-master.outputs.pr_name}}
+          gh pr merge --auto -s ${{needs.create-pr-master.outputs.pr_name}}
