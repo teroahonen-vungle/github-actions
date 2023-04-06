@@ -1,9 +1,6 @@
 name: 'Deploy a release'
 # Controls when the action will run.
 on:
-  push:
-    branches:
-      - "deploy"
   repository_dispatch:
     # this is the event_type passed in from the webhook, needs to match exactly what was defined in the webhook custom data payload
     types: ["trigger-deployment"]
@@ -88,5 +85,4 @@ jobs:
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN }}
         run: |
-          gh pr review --approve -b 'I made this, it must be OK.' ${{needs.create-pr-master.outputs.pr_name}}
           gh pr merge --auto -s ${{needs.create-pr-master.outputs.pr_name}}
