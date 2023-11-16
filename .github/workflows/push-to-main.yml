@@ -6,8 +6,8 @@ on:
     types: [closed]
     
 jobs:
-  check-if-merged:
-    if: ${{ github.event.pull_request.merged }}
+  check-if-release:
+    if: github.event.pull_request.merged && contains(github.head_ref, 'release')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
