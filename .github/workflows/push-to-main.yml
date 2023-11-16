@@ -9,21 +9,30 @@ jobs:
   check-if-release:
     if: github.event.pull_request.merged && contains(github.head_ref, 'release')
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}-${{ steps.release.outputs.release }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Get release
+        id: release
+        run: |
+          echo "release=$(echo ${{ github.ref }} | cut -d/ -f3)" >> $GITHUB_OUTPUT
       - name: Next version
         uses: teroahonen-vungle/tag-version-action@v1.0.0
-        id: version3
+        id: version
         with:
           command: 'minor'
           args: '-fis -m main'
-      - name: debug
-        run: echo ${{ steps.version3.outputs.version }}
+  create-release:
+    needs: 
+      - check-if-release
+    runs-on: ubuntu-latest
+    steps:
       - name: create release
         env:
          GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ steps.version3.outputs.version }}-foo -t ${{ steps.version3.outputs.version }}-foo -n ${{ steps.version3.outputs.version }}-foo
+          gh release create ${{ needs.check-if-release.outputs.version }} -t ${{ needs.check-if-release.outputs.version }} -n ${{ needs.check-if-release.outputs.version }}
