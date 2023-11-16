@@ -1,0 +1,38 @@
+name: Merge to main
+on:
+  push:
+    branches: 
+      - main
+    
+jobs:
+  check-if-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Next version
+        uses: teroahonen-vungle/tag-version-action@v1.0.0
+        id: version1
+        with:
+          command: 'minor'
+          args: '-fis'
+      - name: debug
+        run: echo ${{ steps.version.outputs.version }}
+      - name: Next version
+        uses: teroahonen-vungle/tag-version-action@v1.0.0
+        id: version2
+        with:
+          command: 'minor'
+          args: '-fis -b false'
+      - name: debug
+        run: echo ${{ steps.version.outputs.version2 }}
+      - name: Next version
+        uses: teroahonen-vungle/tag-version-action@v1.0.0
+        id: version3
+        with:
+          command: 'minor'
+          args: '-fis -m main'
+      - name: debug
+        run: echo ${{ steps.version.outputs.version3 }}
