@@ -9,13 +9,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: If and Else
-        run: |
-          if [[ ${{ env.SECVICE_NAME_IN_TAG }} == true ]]; then
-            echo "version tag is true"
-          else
-            echo "version tag is false"
-          fi
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
