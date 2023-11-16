@@ -23,7 +23,7 @@ jobs:
       - name: Get release
         id: release
         run: |
-          echo "release=$(echo ${{ github.head_ref }} | cut -d/ -f3)" >> $GITHUB_OUTPUT
+          echo "release=$(echo ${{ github.head_ref }} | cut -d/ -f2)" >> $GITHUB_OUTPUT
       - name: Next version
         uses: teroahonen-vungle/tag-version-action@v1.0.0
         id: version
