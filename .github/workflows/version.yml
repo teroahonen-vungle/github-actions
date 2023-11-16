@@ -19,7 +19,7 @@ jobs:
           command: 'minor'
           args: '-fis'
       - name: debug
-        run: echo ${{ steps.version.outputs.version }}
+        run: echo ${{ steps.version1.outputs.version }}
       - name: Next version
         uses: teroahonen-vungle/tag-version-action@v1.0.0
         id: version2
@@ -27,7 +27,7 @@ jobs:
           command: 'minor'
           args: '-fis -b false'
       - name: debug
-        run: echo ${{ steps.version.outputs.version2 }}
+        run: echo ${{ steps.version2.outputs.version }}
       - name: Next version
         uses: teroahonen-vungle/tag-version-action@v1.0.0
         id: version3
@@ -35,4 +35,4 @@ jobs:
           command: 'minor'
           args: '-fis -m main'
       - name: debug
-        run: echo ${{ steps.version.outputs.version3 }}
+        run: echo ${{ steps.version3.outputs.version }}
