@@ -22,4 +22,7 @@ jobs:
       id: get-short-sha
       run: |
         echo "shortsha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT 
+    - name: Label PR
+      run: |
+        gh pr edit ${{ github.event.number }} --add-label "ready-for-experiment"
   
