@@ -31,8 +31,10 @@ jobs:
       with:
         issue: DEPLOY-3924
         transition: Deployment Started
+    - name: Debug
+      run: echo ${{steps.transition.outcome}}
     - name: Check state and comment
-      if: steps.transition.outcome == failure()
+      if: steps.transition.outcome == 'failure'
       uses: atlassian/gajira-comment@v3
       with:
         issue: DEPLOY-3924
