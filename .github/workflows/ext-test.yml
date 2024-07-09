@@ -32,7 +32,7 @@ jobs:
         issue: DEPLOY-3924
         transition: Deployment Started
     - name: Check state and comment
-      if: steps.transition.status == failure()
+      if: steps.transition.outcome == 'failure'
       uses: atlassian/gajira-comment@v3
       with:
         issue: DEPLOY-3924
