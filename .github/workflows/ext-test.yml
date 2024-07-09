@@ -1,32 +1,21 @@
-name: Experiment test
+name: Test wrokflow
 on:
   pull_request:
     types: [labeled]
   workflow_dispatch:
 jobs:
-  debug: 
+  job1: 
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-  prepare-image:
-    if: ${{ github.event.label.name == 'experiment' }}
+  job2:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3 
-    - name: Get branch name
-      id: get-branch
-      run: echo "branch=$GITHUB_HEAD_REF" >> $GITHUB_OUTPUT
-    - name: Short SHA
-      id: get-short-sha
+    - name: Echo
       run: |
-        echo "shortsha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT 
-    - name: Label PR
-      run: |
-        gh pr edit ${{ github.event.number }} --add-label "ready-for-experiment"
-      env:
-        GH_TOKEN: ${{ github.token }}
+        echo "foobar" 
+
   
