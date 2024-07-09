@@ -32,9 +32,9 @@ jobs:
         issue: DEPLOY-3924
         transition: Deployment Started
     - name: Check state and comment
-      if: job.steps.bad.status == failure()
+      if: job.steps.transition.status == failure()
       uses: atlassian/gajira-comment@v3
       with:
         issue: DEPLOY-3924
-        comment: Deployment executed succesfully. *No need to manually change the ticket state to Deployment in Progress. Automation does it for you.*
+        comment: Deployment triggered succesfully. *No need to manually change the ticket state to Deployment in Progress. Automation does it for you.*
       
