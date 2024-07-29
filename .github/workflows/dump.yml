@@ -7,9 +7,6 @@ on:
 env:
   SECVICE_NAME_IN_TAG: "false"
 jobs:
-  workflow-telemetry-action:
-    runs-on: ubuntu-latest
-    
   one:
     runs-on: ubuntu-latest
     steps:
