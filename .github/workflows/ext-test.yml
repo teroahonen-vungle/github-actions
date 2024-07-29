@@ -38,5 +38,5 @@ jobs:
       uses: atlassian/gajira-comment@v3
       with:
         issue: DEPLOY-3924
-        comment: "*Deployment triggered succesfully.*. No need to manually transition the ticket status to _Deployment in Progress_. Automation will do it for you."
+        comment: "*Deployment triggered succesfully.* No need to manually transition the ticket status to _Deployment in Progress_. Automation will do it for you."
       
