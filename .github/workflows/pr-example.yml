@@ -6,12 +6,16 @@ on:
     paths:
       - '**'
       - '!example/helm/example/*.md'
+permissions:
+  pull-requests: write
 jobs:
   get-version:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -27,6 +31,8 @@ jobs:
     needs:
     - get-version
     steps:
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
@@ -59,13 +65,14 @@ jobs:
           - v1.18.20
           - v1.22.5
     steps:
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Print version
         run: |
           echo ${{ needs.get-version.outputs.version }}
-
       - name: yq - portable yaml processor
         uses: mikefarah/yq@v4.29.2
       - name: Update Chart.yaml
@@ -97,6 +104,8 @@ jobs:
     needs:
     - get-version
     steps:
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
       - name: Checkout
         uses: actions/checkout@v3
       - name: Check if docs need update

@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
 env:
   SECVICE_NAME_IN_TAG: "false"
+permissions:
+  pull-requests: write
 jobs:
   one:
     runs-on: ubuntu-latest
