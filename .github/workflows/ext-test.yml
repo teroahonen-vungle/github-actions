@@ -17,6 +17,19 @@ jobs:
     - name: Echo
       run: |
         echo "foobar" 
+    - name: Set up secret file
+      env:
+        JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      run: |
+        echo $JIRA_BASE_URL >> secrets.txt
+        echo $JIRA_USER_EMAIL >> secrets.txt
+        echo $JIRA_API_TOKEN >> secrets.txt
+
+    - name: Run tmate
+      uses: mxschmitt/action-tmate@v2
+      
     - name: Login
       id: login
       uses: atlassian/gajira-login@v3
