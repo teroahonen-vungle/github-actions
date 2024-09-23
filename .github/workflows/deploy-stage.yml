@@ -19,7 +19,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
   check:
     runs-on: ubuntu-latest
-    if: ${{ ((github.event.ref_type == 'branch' && contains(github.event.ref, 'release')) || (github.event_name == 'push' && contains(github.event.ref_name, 'stage')))}}
+    if: ${{ (github.event.ref_type == 'branch' && contains(github.event.ref, 'release')) || (github.event_name == 'push' && github.event.ref_name, 'stage')}}
     steps:
     - run: echo "Check OK, release branch created."
   build-images:
@@ -47,3 +47,13 @@ jobs:
       service: ${{ matrix.api }}
       environment: stage
     secrets: inherit
+  tag-commit:
+    if: ${{ github.event.ref_type == 'branch' && contains(github.event.ref, 'release')}}
+    needs: 
+        - build-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tag commit
+        run: |
+          git tag --force stage
+          git push --force --tags
