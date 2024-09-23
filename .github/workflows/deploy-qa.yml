@@ -44,7 +44,7 @@ jobs:
           - verifyvault
     uses: ./.github/workflows/build-image.yml
     with:
-      image_tag: PR-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+      image_tag: ${{ matrix.api }}-qa-${{ needs.init.outputs.commit_id }}
       git_ref: ${{github.ref}}
       service: ${{ matrix.api }}
     secrets: inherit
