@@ -4,10 +4,6 @@ run-name: ${{inputs.application}} - ${{inputs.image_tag}} - ${{inputs.git_ref}}
 on:
   workflow_dispatch:
     inputs:
-      image_tag:
-        description: Tag for both amd64 and multi-arch. For example, v1.251.0, PR-xxx.
-        type: string
-        required: true
       git_ref:
         description: The commit/branch/tag we build for. Keep empty to use default branch.
         type: string
@@ -26,10 +22,6 @@ on:
         default: "qa"
   workflow_call:
     inputs:
-      image_tag:
-        description: Tag for both amd64 and multi-arch. For example, v1.251.0, PR-xxx.
-        type: string
-        required: true
       git_ref:
         description: The commit/branch/tag we build for. Keep empty to use default branch.
         type: string

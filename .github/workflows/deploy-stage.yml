@@ -1,18 +1,23 @@
-name: Deploy QA
+name: Deploy Stage
 on:
+  create: 
   push:
-    branches:
-      - "dev"
     tags:
-      - "qa"
-  workflow_dispatch:
+      - "stage"
 permissions:
   id-token: write
   contents: write
   packages: write
   pull-requests: read
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.ref_type == 'branch' && contains(github.event.ref, 'release')}}
+    steps:
+    - run: echo "Check OK, release branch created."
   build-images:
+    needs: 
+        - check
     strategy:
       matrix:
         api:
@@ -33,5 +38,5 @@ jobs:
     with:
       git_ref: ${{github.ref}}
       service: ${{ matrix.api }}
-      environment: qa
+      environment: stage
     secrets: inherit
