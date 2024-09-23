@@ -1,0 +1,47 @@
+name: Deploy QA
+on:
+  push:
+    branches:
+      - "dev"
+    tags:
+      - "qa"
+  workflow_dispatch:
+permissions:
+  pull-requests: write
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    outputs:
+      commit_id: ${{ steps.commit_id.outputs.commit_id }}
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Get commit id
+      id: commit_id
+      run: |
+        echo "commit_id=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+  build-images:
+    needs: 
+        - init
+    strategy:
+      matrix:
+        api:
+          - admin
+          - alert
+          - auth
+          - authenticator
+          - cron
+          - manage
+          - mediation
+          - metadata
+          - processor
+          - reporting
+          - salesforce
+          - scheduler
+          - verifyvault
+    uses: ./.github/workflows/build-image.yml
+    with:
+      image_tag: PR-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+      git_ref: ${{github.ref}}
+      service: ${{ matrix.api }}
+    secrets: inherit
