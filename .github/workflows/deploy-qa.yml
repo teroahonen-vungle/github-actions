@@ -47,4 +47,5 @@ jobs:
       image_tag: ${{ matrix.api }}-qa-${{ needs.init.outputs.commit_id }}
       git_ref: ${{github.ref}}
       service: ${{ matrix.api }}
+      environment: qa
     secrets: inherit
