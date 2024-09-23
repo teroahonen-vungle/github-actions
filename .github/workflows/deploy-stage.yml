@@ -19,7 +19,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
   check:
     runs-on: ubuntu-latest
-    if: ${{ ((github.event.ref_type == 'branch' && contains(github.event.ref, 'release')) || (github.event.ref_type == 'tag' && contains(github.event.ref_name, 'stage')))}}
+    if: ${{ ((github.event.ref_type == 'branch' && contains(github.event.ref, 'release')) || (github.event.name == 'push' && contains(github.event.ref_name, 'stage')))}}
     steps:
     - run: echo "Check OK, release branch created."
   build-images:
