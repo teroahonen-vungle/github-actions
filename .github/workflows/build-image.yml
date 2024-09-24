@@ -18,8 +18,13 @@ on:
           - qa
           - stage
           - production
+          - feature
         required: true
         default: "qa"
+      image_tag:
+        description: The image tag to build
+        type: string
+        required: true
   workflow_call:
     inputs:
       git_ref:
@@ -35,6 +40,10 @@ on:
         type: string
         required: true
         default: "qa"
+      image_tag:
+        description: The image tag to build
+        type: string
+        required: true
 permissions:
   id-token: write
   contents: write
@@ -76,15 +85,7 @@ jobs:
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Checkout Code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{inputs.git_ref}}
-      - name: Get short SHA
-        id: short-sha
-        shell: bash
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT  
+ 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -94,7 +95,7 @@ jobs:
           build-args: |
             SERVICE=${{ inputs.service }} 
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.environment}}-${{ steps.short-sha.outputs.sha_short }}
+            ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.image_tag}}
           labels: | 
             org.opencontainers.image.source=https://github.com/Vungle/slydell
             org.opencontainers.image.title=Slydell ${{ inputs.service }}

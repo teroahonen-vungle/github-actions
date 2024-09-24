@@ -1,9 +1,9 @@
-name: Deploy Stage
+name: Deploy feature environment
 on:
-  create: 
-  push:
-    tags:
-      - "stage"
+  pull_request:
+    types: [ labeled ]
+    
+  workflow_dispatch:
 permissions:
   id-token: write
   contents: write
@@ -18,8 +18,8 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
   init:
+    if: ${{ github.event.label.name == 'Ask for deployment' || contains(github.event.pull_request.labels.*.name, 'Ready For deployment') }}
     runs-on: ubuntu-latest
-    if: ${{ (github.event.ref_type == 'branch' && contains(github.event.ref, 'release')) || (github.event_name == 'push' && github.ref_name == 'stage')}}
     outputs:
       commit_id: ${{ steps.short-sha.outputs.sha_short }}
     steps:
@@ -52,16 +52,20 @@ jobs:
     with:
       git_ref: ${{github.ref}}
       service: ${{ matrix.api }}
-      environment: stage
-      image_tag: stage-${{ needs.init.outputs.commit_id }}
+      environment: feature
+      image_tag: feature-${{ github.event.number }}-${{ needs.init.outputs.commit_id }}
     secrets: inherit
-  tag-commit:
-    if: ${{ github.event.ref_type == 'branch' && contains(github.event.ref, 'release')}}
-    needs: 
-        - build-images
+  label-for-ready:
     runs-on: ubuntu-latest
+    needs:
+      - build-images
     steps:
-      - name: Tag commit
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Label PR for ready
         run: |
-          git tag --force stage
-          git push --force --tags
+          gh pr edit ${{ github.event.number }} --remove-label "Ask for deployment"
+          gh pr edit ${{ github.event.number }} --add-label "Ready for deployment"
+        env:
+          GH_TOKEN: ${{ github.token }}
+    
