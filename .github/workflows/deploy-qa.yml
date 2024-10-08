@@ -26,6 +26,7 @@ jobs:
   check-changes:
     uses: ./.github/workflows/check-changes.yml
   build-images:
+    if: ${{needs.check-changes.outputs.contains_changes == 'true'}}
     needs: 
       - init
       - check-changes
