@@ -2,15 +2,15 @@ name: Check changes
 
 on:
   workflow_call:
+    outputs:
+      changes: 
+        description: "List of changes"
+        value: ${{ jobs.check-change.outputs.changes }}
 jobs:
   check-change:
     runs-on: ubuntu-latest
     outputs:
-      dir1: ${{ steps.check.outputs.dir1 }}
-      dir2: ${{ steps.check.outputs.dir1 }}
-      dir3: ${{ steps.check.outputs.dir2 }}
-      dir4: ${{ steps.check.outputs.dir3 }}
-      
+      changes: ${{ steps.check.outputs.changes }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3

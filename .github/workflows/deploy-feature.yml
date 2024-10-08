@@ -17,20 +17,7 @@ jobs:
       - check-changes
     strategy:
       matrix:
-        api:
-          - admin
-          - alert
-          - auth
-          - authenticator
-          - cron
-          - manage
-          - mediation
-          - metadata
-          - processor
-          - reporting
-          - salesforce
-          - scheduler
-          - verifyvault
+        api: ${{needs.check-changes.outputs.changes}}
     runs-on: ubuntu-latest
     steps:
     - run: |
