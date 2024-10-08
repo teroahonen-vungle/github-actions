@@ -1,7 +1,6 @@
 name: Deploy feature environment
 on:
-  pull_request:
-    types: [ labeled ]
+  push:
     branches: 
       - dev
   workflow_dispatch:
@@ -11,28 +10,11 @@ permissions:
   packages: write
   pull-requests: read
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-  init:
-    if: ${{ github.event.label.name == 'Ask for deployment' || contains(github.event.pull_request.labels.*.name, 'Ready For deployment') }}
-    runs-on: ubuntu-latest
-    outputs:
-      commit_id: ${{ steps.short-sha.outputs.sha_short }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Get short SHA
-        id: short-sha
-        shell: bash
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+  check-changes:
+    uses: ./.github/workflows/check-changes.yml
   build-images:
     needs: 
-      - init
+      - check-changes
     strategy:
       matrix:
         api:
@@ -49,24 +31,9 @@ jobs:
           - salesforce
           - scheduler
           - verifyvault
-    uses: ./.github/workflows/build-image.yml
-    with:
-      git_ref: ${{github.ref}}
-      service: ${{ matrix.api }}
-      environment: feature
-      image_tag: feature-${{ github.event.number }}-${{ needs.init.outputs.commit_id }}
-    secrets: inherit
-  label-for-ready:
     runs-on: ubuntu-latest
-    needs:
-      - build-images
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Label PR for ready
-        run: |
-          gh pr edit ${{ github.event.number }} --remove-label "Ask for deployment"
-          gh pr edit ${{ github.event.number }} --add-label "Ready for deployment"
-        env:
-          GH_TOKEN: ${{ github.token }}
+    - run: |
+        echo ${{ matrix.api }}
+    
     
