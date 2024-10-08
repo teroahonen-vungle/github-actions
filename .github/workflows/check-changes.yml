@@ -38,5 +38,6 @@ jobs:
       - run: | 
           echo ${{ steps.check.outputs.changes }}
       - run: |
-          echo '{"api": ${{ steps.check.outputs.changes }}}' > /tmp/json.json
+          echo {"api": ${{ steps.check.outputs.changes }}} > /tmp/json.json
+          cat /tmp/json.json
           jq /tmp/json.json
