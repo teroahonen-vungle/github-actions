@@ -12,6 +12,13 @@ permissions:
   packages: write
   pull-requests: read
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
   init:
     runs-on: ubuntu-latest
     outputs:
