@@ -20,7 +20,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: check
         with:
-          list-files: 'json'
+          list-files: 'csv'
           filters: |
             dir1:
               - 'api/dir1/**'
@@ -36,8 +36,5 @@ jobs:
           echo ${{ steps.check.outputs.dir3 }} 
           echo ${{ steps.check.outputs.dir4 }}
       - run: | 
-          echo ${{ steps.check.outputs.changes }}
-      - run: |
-          echo {\"api\": ${{ steps.check.outputs.changes }}} > /tmp/json.json
-          cat /tmp/json.json
-          jq /tmp/json.json
+          echo ${{ steps.check.outputs.changes }} >> /tmp/changes.csv
+          jq -R 'split(",")' /tmp/changes.csv 
