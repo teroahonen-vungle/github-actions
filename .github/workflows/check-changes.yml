@@ -6,6 +6,9 @@ on:
       changes: 
         description: "List of changes"
         value: ${{ jobs.check-change.outputs.changes }}
+      contains_changes:
+        description: "Check if changes are present"
+        value: ${{ jobs.check-change.outputs.changes != '[]' }}
 jobs:
   check-change:
     runs-on: ubuntu-latest
