@@ -1,1 +1,2 @@
 dir1/file.txt
+Tue Oct 8 09:24:29 EEST 2024

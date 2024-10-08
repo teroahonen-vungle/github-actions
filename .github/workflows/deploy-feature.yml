@@ -13,13 +13,23 @@ jobs:
   check-changes:
     uses: ./.github/workflows/check-changes.yml
   
+  debug: 
+    runs-on: ubuntu-latest
+    needs: 
+      - check-changes
+    steps:
+      - name: Debug
+        run: |
+          echo ${{needs.check-changes.outputs.changes}}
+          echo ${{needs.check-changes.outputs.contains_changes}}
+          echo ${{needs.check-changes.outputs.changes_json}}
   build-images:
     if: ${{needs.check-changes.outputs.contains_changes}}
     needs: 
       - check-changes
     strategy:
       matrix:
-        api: ${{needs.check-changes.outputs.changes}}
+        api: ${{needs.check-changes.outputs.changes_json}}
     runs-on: ubuntu-latest
     steps:
     - run: |
