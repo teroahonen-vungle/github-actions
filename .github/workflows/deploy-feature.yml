@@ -2,11 +2,7 @@ name: Deploy feature environment
 on:
   push:
     branches: 
-<<<<<<< HEAD
-      - main
-=======
     - main
->>>>>>> 2a38fb3c91124a6d2f9173898618899d8be4ce4d
   workflow_dispatch:
 permissions:
   id-token: write
