@@ -24,7 +24,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: check
         with:
-          list-files: 'csv'
           filters: |
             dir1:
               - 'api/dir1/**'
