@@ -20,13 +20,13 @@ jobs:
           list-files: 'json'
           filters: |
             dir1:
-              - 'dir1/**'
+              - 'api/dir1/**'
             dir2:
-              - 'dir2/**'
+              - 'api/dir2/**'
             dir3:
-              - 'dir3/**'
+              - 'api/dir3/**'
             dir4:
-              - 'dir4/**'
+              - 'api/dir4/**'
       - run: |
          echo ${{ steps.check.outputs.dir1 }} 
          echo ${{ steps.check.outputs.dir2 }} 
