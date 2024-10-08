@@ -24,7 +24,7 @@ jobs:
           echo '${{needs.check-changes.outputs.contains_changes}}'
           echo '${{needs.check-changes.outputs.changes_json}}'
   build-images:
-    if: ${{needs.check-changes.outputs.contains_changes}}
+    if: ${{needs.check-changes.outputs.contains_changes == 'true'}}
     needs: 
       - check-changes
     strategy:
