@@ -40,8 +40,10 @@ jobs:
           echo ${{ steps.check.outputs.dir3 }} 
           echo ${{ steps.check.outputs.dir4 }}
       - name: create json
+        if: steps.check.outputs.changes != '[]'
         id: create-json
         run: | 
+          echo ${{ steps.check.outputs.changes }}
           echo ${{ steps.check.outputs.changes }} >> /tmp/changes.csv
           jq -R 'split(",")' /tmp/changes.csv >> /tmp/changes.json
           echo {\"api\":$(jq . /tmp/changes.json)} > /tmp/changes.json
