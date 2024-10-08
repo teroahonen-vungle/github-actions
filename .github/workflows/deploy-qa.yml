@@ -12,6 +12,13 @@ permissions:
   packages: write
   pull-requests: read
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
   init:
     runs-on: ubuntu-latest
     outputs:
@@ -36,10 +43,15 @@ jobs:
     steps:
     - run: |
         echo ${{ matrix.api }}
+  debug2:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo ${{ github.event_name}}
+          echo ${{ github.event.ref_name}}
+          echo ${{ github.event.ref_type}}
   tag-commit:
-    if: ${{ github.event.ref_type == 'branch'}}
-    needs: 
-        - build-images
+    if: ${{ github.event_name == 'branch'}}
     runs-on: ubuntu-latest
     steps:
       - name: Tag commit
