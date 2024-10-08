@@ -18,7 +18,7 @@ jobs:
       commit_id: ${{ steps.short-sha.outputs.sha_short }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get short SHA
         id: short-sha
         shell: bash

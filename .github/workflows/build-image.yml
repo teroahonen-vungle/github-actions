@@ -92,6 +92,7 @@ jobs:
           context: .
           file: ./Dockerfile.action
           push: true
+          platforms: linux/amd64,linux/arm64
           build-args: |
             SERVICE=${{ inputs.service }} 
           tags: |
