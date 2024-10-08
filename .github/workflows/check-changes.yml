@@ -42,7 +42,7 @@ jobs:
         if: steps.check.outputs.changes != '[]'
         id: create-json
         run: | 
-          echo ${{ steps.check.outputs.changes }}
-          echo {\"api\":${{ steps.check.outputs.changes }}} > /tmp/changes.json
+          echo '${{ steps.check.outputs.changes }}''
+          echo '{"api":${{ steps.check.outputs.changes }}}' > /tmp/changes.json
           cat /tmp/changes.json
           echo "changes_json=$(cat /tmp/changes.json)" >> $GITHUB_OUTPUT 
