@@ -28,7 +28,9 @@ jobs:
             dir4:
               - 'api/dir4/**'
       - run: |
-         echo ${{ steps.check.outputs.dir1 }} 
-         echo ${{ steps.check.outputs.dir2 }} 
-         echo ${{ steps.check.outputs.dir3 }} 
-         echo ${{ steps.check.outputs.dir4 }}
+          echo ${{ steps.check.outputs.dir1 }} 
+          echo ${{ steps.check.outputs.dir2 }} 
+          echo ${{ steps.check.outputs.dir3 }} 
+          echo ${{ steps.check.outputs.dir4 }}
+      - run: | 
+          echo ${{ steps.check.outputs.changes }}
