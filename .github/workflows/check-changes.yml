@@ -9,11 +9,15 @@ on:
       contains_changes:
         description: "Check if changes are present"
         value: ${{ jobs.check-change.outputs.changes != '[]' }}
+      changes_json:
+          description: "Changes in json format for matrix strategy"
+          value: ${{ jobs.check-change.outputs.changes_json}}
 jobs:
   check-change:
     runs-on: ubuntu-latest
     outputs:
       changes: ${{ steps.check.outputs.changes }}
+      changes_json: ${{ steps.create-json.outputs.changes_json }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -35,7 +39,10 @@ jobs:
           echo ${{ steps.check.outputs.dir2 }} 
           echo ${{ steps.check.outputs.dir3 }} 
           echo ${{ steps.check.outputs.dir4 }}
-      - run: | 
+      - name: create json
+        id: create-json
+        run: | 
           echo ${{ steps.check.outputs.changes }} >> /tmp/changes.csv
           jq -R 'split(",")' /tmp/changes.csv >> /tmp/changes.json
-          echo "changes_json={\"api\":$(jq . /tmp/changes.json)}" >> $GITHUB_OUTPUT 
+          echo {\"api\":$(jq . /tmp/changes.json)} > /tmp/changes.json
+          echo "changes_json=$(cat /tmp/changes.json)" >> $GITHUB_OUTPUT 
