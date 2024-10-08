@@ -1,0 +1,62 @@
+name: Check changes
+
+on:
+  workflow_call:
+    outputs:
+      changes: 
+        description: "List of changes"
+        value: ${{ jobs.check-change.outputs.changes }}
+      contains_changes:
+        description: "Check if changes are present"
+        value: ${{ jobs.check-change.outputs.changes != '[]' }}
+      changes_json:
+          description: "Changes in json format for matrix strategy"
+          value: ${{ jobs.check-change.outputs.changes_json}}
+jobs:
+  check-change:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.check.outputs.changes }}
+      changes_json: ${{ steps.create-json.outputs.changes_json }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: check
+        with:
+          filters: |
+            admin:
+              - 'api/admin/**'
+            alert:
+              - 'api/alert/**'
+            auth:
+              - 'api/auth/**'
+            authenticator:
+              - 'api/authenticator/**'
+            cron:
+              - 'api/cron/**'
+            manage:
+              - 'api/manage/**'
+            mediation:
+              - 'api/mediation/**'
+            metacrawler:
+              - 'api/metacrawler/**'
+            metadata:
+              - 'api/metadata/**'
+            processor:
+              - 'api/processor/**'
+            reporting:
+              - 'api/reporting/**'
+            salesforce:
+              - 'api/salesforce/**'
+            scheduler:
+              - 'api/scheduler/**'
+            verifyvault:
+              - 'api/verifyvault/**'
+      - name: Create changes json
+        if: steps.check.outputs.changes != '[]'
+        id: create-json
+        run: | 
+          echo '${{ steps.check.outputs.changes }}'
+          echo '{"api":${{ steps.check.outputs.changes }}}' > /tmp/changes.json
+          echo "changes_json=$(cat /tmp/changes.json)" >> $GITHUB_OUTPUT 
