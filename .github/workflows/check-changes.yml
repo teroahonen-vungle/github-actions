@@ -45,6 +45,9 @@ jobs:
         run: | 
           echo ${{ steps.check.outputs.changes }}
           echo ${{ steps.check.outputs.changes }} >> /tmp/changes.csv
+          cat /tmp/changes.csv
           jq -R 'split(",")' /tmp/changes.csv >> /tmp/changes.json
+          cat /tmp/changes.json
           echo {\"api\":$(jq . /tmp/changes.json)} > /tmp/changes.json
+          cat /tmp/changes.json
           echo "changes_json=$(cat /tmp/changes.json)" >> $GITHUB_OUTPUT 
