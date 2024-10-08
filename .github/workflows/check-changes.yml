@@ -36,5 +36,5 @@ jobs:
           echo ${{ steps.check.outputs.dir3 }} 
           echo ${{ steps.check.outputs.dir4 }}
       - run: | 
-          echo ${{ steps.check.outputs.changes }} >> /tmp/changes.csv
+          echo ${{ steps.check.outputs.changes }} | >> /tmp/changes.csv
           jq -R 'split(",")' /tmp/changes.csv 
