@@ -28,8 +28,7 @@ jobs:
     needs: 
       - check-changes
     strategy:
-      matrix:
-        api: ${{needs.check-changes.outputs.changes_json}}
+      matrix: ${{fromJson(needs.check-changes.outputs.changes_json)}}
     runs-on: ubuntu-latest
     steps:
     - run: |
