@@ -22,6 +22,7 @@ jobs:
     if: ${{ (github.event.ref_type == 'branch' && contains(github.event.ref, 'release')) || (github.event_name == 'push' && github.ref_name == 'stage')}}
     outputs:
       commit_id: ${{ steps.short-sha.outputs.sha_short }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -29,6 +30,23 @@ jobs:
         id: short-sha
         shell: bash
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get version 1
+        if : ${{ github.event.ref_type == 'branch' }}
+        id: version1
+        shell: bash
+        run: | 
+          echo "version1=$(echo "${{github.event.ref}}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+      - name: Get version 2
+        id: version2
+        shell: bash
+        run: | 
+          echo "version2=$(date +"%Y%m%d%H%M")" >> $GITHUB_OUTPUT
+      - name: Get final version
+        id: version
+        shell: bash
+        run: | 
+          echo "version=${{ steps.version1.outputs.version1 }}${{ steps.version2.outputs.version2 }}" >> $GITHUB_OUTPUT
+      
   build-images:
     needs: 
       - init
@@ -48,13 +66,10 @@ jobs:
           - salesforce
           - scheduler
           - verifyvault
-    uses: ./.github/workflows/build-image.yml
-    with:
-      git_ref: ${{github.ref}}
-      service: ${{ matrix.api }}
-      environment: stage
-      image_tag: stage-${{ needs.init.outputs.commit_id }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo ${{ matrix.api }}-${{ needs.init.outputs.version }}-rc-${{ needs.init.outputs.commit_id }}
   tag-commit:
     if: ${{ github.event.ref_type == 'branch' && contains(github.event.ref, 'release')}}
     needs: 
