@@ -51,9 +51,11 @@ jobs:
           echo ${{ github.event.ref_name}}
           echo ${{ github.event.ref_type}}
   tag-commit:
-    if: ${{ github.event_name == 'branch'}}
+    if: ${{ github.event_name == 'push'}}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
       - name: Tag commit
         run: |
           git tag --force qa
