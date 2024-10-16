@@ -1,0 +1,14 @@
+# slydell
+Supply application backend services
+
+## Installing the Chart
+To install the chart with the release name `admin` in `appqa` namespace with override file `appqa.yaml`:
+```
+$ helm -n appqa upgrade --install slydell-admin  -f appqa.yaml slydell
+```
+
+## Rendering the Chart
+To generate all the resources created by the chart with override file `appqa.yaml`:
+```
+$ helm -n appqa template slydell-admin slydell -f appqa.yaml
+```

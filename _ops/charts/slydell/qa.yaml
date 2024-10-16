@@ -1,0 +1,137 @@
+commonEnvs:
+  SLYDELL_MEDIVH_INTERNAL_SCHEMES: "https"
+  SLYDELL_AUTHENTICATOR_ENDPOINT: "slydell-authenticator-slydell"
+  SLYDELL_KAFKA_PROXY_KAFKA_URL: "http://httpkafka-proxy.appqa/"
+  SLYDELL_MONGO_NAME: "qa-vvv-repl.becyx.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+  SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa.vungle.io/?confirmation="
+  SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+  SLYDELL_PETER_URL_ADMIN: "https://pub-ctrl-qa.vungle.io"
+
+deployments:
+  alert:
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  admin:
+    ingress:
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qanew-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  manage:
+    ingress:
+      className: vungle.io
+      host:
+        url: publisher-qanew-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  mediation:
+    ingress:
+      className: vungle.io
+      host:
+        url: mediation-qanew-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  metacrawler:
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+      SLYDELL_METACRAWLER_CRAWLER_ENABLED: "true"
+    extraSecret: "slydell-general-qa-new"
+  metadata:
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: metadata-qanew-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+      SLYDELL_METADATA_CONSUMER_ENABLED: "true"
+    extraSecret: "slydell-general-qa-new"
+  reporting:
+    ingress:
+      className: vungle.io
+      host:
+        url: pub-reporting-qanew-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  salesforce:
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_SALESFORCE_AUTH: "test.salesforce.com"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+    extraSecret: "slydell-general-qa-new"
+  cron:
+    replicas: 0 # closed default, only open at test phase.
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_AWS_S3_BUCKET: "vungle2-cdn-qa"
+      SLYDELL_AWS_S3_CDN: ""
+    extraSecret: "slydell-general-qa-new"
+  processor:
+    replicas: 1
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_AWS_S3_JOBSFOLDER: "jobs-assets"
+      SLYDELL_ADMIN_URL: "http://slydell-admin-slydell/api/v1/"
+    extraSecret: "slydell-general-qa-new"
+  scheduler:
+    replicas: 1
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "local-kafka-brokers:9092"
+    extraSecret: "slydell-general-qa-new"
+  authenticator:
+    replicas: 1
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+    extraSecret: "slydell-general-qa-new"
+  verifyvault:
+    replicas: 1
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: verifyvault-qanew-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+    extraSecret: "slydell-general-qa-new"
+
+eksEnv: qa
+
+externalSecrets:
+  enabled: false

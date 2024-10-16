@@ -1,0 +1,171 @@
+commonEnvs:
+  SLYDELL_AUTHENTICATOR_ENDPOINT: "slydell-authenticator-slydell"
+  SLYDELL_OKTA_SYNC_ENDPOINT: "https://auth-beta-api.vungle.io"
+  SLYDELL_KAFKA_PROXY_KAFKA_URL: "http://httpkafka:443/"
+  SLYDELL_MONGO_NAME: "prod-vvv-repl.ej8fy.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+  SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-beta.vungle.io/?confirmation="
+  SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-beta.vungle.io/reset-password/?token="
+  SLYDELL_PETER_URL_ADMIN: "https://pub-ctrl-beta.vungle.io"
+  SLYDELL_STATS_ENDPOINT: 'prometheus-statsd-exporter.grafana.svc.cluster.local:9125'
+  SLYDELL_METADATA_HOST: "slydell-metadata-slydell"
+  SLYDELL_METADATA_SCHEMAS: "http"
+
+deployments:
+  auth:
+    replicas: 0
+  alert:
+    replicas: 0
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_KAFKA_CHANGELOG_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+
+  admin:
+    replicas: 1
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      host:
+        url: pub-ctrl-beta-api.vungle.io
+      tls:
+        - hosts:
+            - pub-ctrl-beta-api.vungle.io
+          secretName: ssl-cert-vungle-io
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "true"
+      SLYDELL_AWS_S3_JOBSBUCKET: "vungle2-reports"
+  manage:
+    replicas: 1
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      host:
+        url: publisher-beta-api.vungle.io
+      tls:
+        - hosts:
+            - publisher-beta-api.vungle.io
+          secretName: ssl-cert-vungle-io
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: https://ui2.tipalti.com/payeedashboard/home
+      SLYDELL_TIPALTI_URL_LIST: https://ui.tipalti.com/Payees/PaymentList.aspx
+      SLYDELL_TIPALTI_URL_INVOICE: https://ui2.tipalti.com/PayeeDashboard/Invoices
+      SLYDELL_RATELIMIT_ENABLED: "true"
+  mediation:
+    replicas: 0
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      host:
+        url: mediation-beta-api.vungle.io
+      tls:
+        - hosts:
+            - mediation-beta-api.vungle.io
+          secretName: ssl-cert-vungle-io
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "true"
+      SLYDELL_RATELIMIT_MAX: "3"
+  metadata:
+    replicas: 1
+    ingress:
+      enabled: false
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_METADATA_CONSUMER_ENABLED: "false"
+      SLYDELL_METADATA_MONGO_NAME: "prod-vvv-repl.ej8fy.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METADATA_KAFKA_BROKERS_LIST: "producer-broker-prod.kafka.vungle.io:9092"
+      SLYDELL_METADATA_KAFKA_TOPIC: "ex-jaeger-app-bundles-20221130"
+      SLYDELL_METADATA_KAFKA_GROUP_ID: "metadata-group-beta"
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_ENDPOINT: "keycloak.gamerefinery.com"
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_BASE_PATH: "/auth/realms/saas/protocol/openid-connect"
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_SSL: 'true'
+      SLYDELL_METADATA_GAMEREFINERY_API_ENDPOINT: 'proxy-us.gamerefinery.com'
+      SLYDELL_METADATA_GAMEREFINERY_API_BASEPATH: '/connectserver'
+      SLYDELL_METADATA_GAMEREFINERY_API_SSL: 'true'
+      SLYDELL_METADATA_AUTHENTICATOR_ENDPOINT: "slydell-authenticator-slydell"
+      SLYDELL_METADATA_AUTHENTICATOR_SSL: 'false'
+  reporting:
+    replicas: 1
+    ingress:
+      annotations:
+        kubernetes.io/ingress.class: nginx
+      host:
+        url: pub-reporting-beta-api.vungle.io
+      tls:
+        - hosts:
+            - pub-reporting-beta-api.vungle.io
+          secretName: ssl-cert-vungle-io
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "true"
+      SLYDELL_MEDIVH_INTERNAL_SCHEMES: "https"
+      SLYDELL_MEDIVH_INTERNAL_HOST: report.api.vungle.com
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+  salesforce:
+    replicas: 0
+    ingress:
+      enabled: false
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: beta
+      SLYDELL_SALESFORCE_AUTH: login.salesforce.com
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+
+  cron:
+    replicas: 0
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "beta"
+      SLYDELL_AWS_S3_BUCKET: "vungle2-cdn-prod"
+      SLYDELL_AWS_S3_CDN: "https://cdn-lb.vungle.com"
+
+  processor:
+    replicas: 0
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "beta"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+      SLYDELL_AWS_S3_JOBSBUCKET: "vungle2-reports"
+      SLYDELL_MEDIVH_INTERNAL_ENDPOINT: "https://report.api.vungle.com/int/pub/reports/performance"
+      SLYDELL_ADMIN_URL: "http://slydell-admin-slydell/api/v1/"
+
+  scheduler:
+    replicas: 0
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "beta"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: producer-broker-prod.kafka.vungle.io:9092
+
+  authenticator:
+    replicas: 1
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "beta"
+      SLYDELL_GAMEREFINERY_AUTH_ENDPOINT: "keycloak.gamerefinery.com"
+      SLYDELL_GAMEREFINERY_AUTH_BASE_PATH: "/auth/realms/saas/protocol/openid-connect"
+
+  verifyvault:
+    replicas: 1
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "beta"
+      SLYDELL_VERIFYVAULT_MONGO_NAME: "prod-vvv-repl.ej8fy.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_VERIFYVAULT_KAFKA_PROXY_KAFKA_URL: "http://httpkafka:443/"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_BROKERS_LIST: "producer-broker-prod.kafka.vungle.io:9092"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_BROKERS_LIST: "producer-broker-prod.kafka.vungle.io:9092"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_BROKERS_LIST: "producer-broker-prod.kafka.vungle.io:9092"
+
+roleName: slydell-prod

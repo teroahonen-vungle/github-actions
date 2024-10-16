@@ -1,0 +1,481 @@
+secretEnabled: "false"
+secretName: "slydell-general-new"
+eksEnv: <placeholder>
+multiDeploymentEnabled: false
+
+imagePullSecrets: vungleregistrykey
+
+initialDelaySeconds: 60
+
+commonEnvs:
+  SLYDELL_STATS_NAME_SPACE: "applications.slydell"
+  SLYDELL_STATS_BUFFER_SIZE: "1"
+  SLYDELL_SALESFORCE_ENABLED: "true"
+  SLYDELL_SALESFORCE_RETRY_DURATION: "60s"
+  SLYDELL_KAFKA_PROXY_KAFKA_URL: "https://kfk-log-qa-us-west-2.vungle.io/"
+  SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-20220421"
+  SLYDELL_KAFKA_SALESFORCE_GROUP_ID: "db-pub-salesforce-group-20220421"
+  SLYDELL_KAFKA_TRACKING_TOPIC: "db-pub-tracking-20220421"
+  SLYDELL_KAFKA_JOB_SUBMITTER_NAME: "submitter"
+  SLYDELL_KAFKA_JOB_SUBMITTER_TOPIC: "db-pub-jobsubmitter-20220421"
+  SLYDELL_KAFKA_JOB_SUBMITTER_GROUP_ID: "db-pub-jobsubmitter-group-20220421"
+  SLYDELL_KAFKA_JOB_DISPATCHER_NAME: "dispatcher"
+  SLYDELL_KAFKA_JOB_DISPATCHER_TOPIC: "db-pub-jobdispatcher-20220421"
+  SLYDELL_KAFKA_JOB_DISPATCHER_GROUP_ID: "db-pub-jobdispatcher-group-20220421"
+  SLYDELL_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-20220421"
+  SLYDELL_KAFKA_LOG_SYS_TOPIC: "slydell-sys-20220421"
+  SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification"
+  SLYDELL_KAFKA_CHANGELOG_GROUP_ID: "db-pub-notification-group"
+  SLYDELL_RATELIMIT_MAX: "5"
+  SLYDELL_RATELIMIT_TTL: "1s"
+  SLYDELL_MEDIVH_INTERNAL_BASE_PATH: "/int"
+  SLYDELL_MONGO_DATABASE: "vvv-repl"
+  SLYDELL_AUTHENTICATOR_SSL: "false"
+  SLYDELL_GAMEREFINERY_API_ENDPOINT: "proxy-us.gamerefinery.com"
+  SLYDELL_GAMEREFINERY_API_BASE_PATH: "/connectserver"
+  SLYDELL_GAMEREFINERY_API_SSL: "true"
+  SLYDELL_MONGO_SCHEME: "mongodb+srv"
+  SLYDELL_OKTA_SYNC_ENDPOINT: "https://auth-qa-api.vungle.io"
+  SLYDELL_MONGO_NAME: "qa-vvv-repl.becyx.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+  SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa.vungle.io/?confirmation="
+  SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.com/reset-password/?token="
+  SLYDELL_PETER_URL_ADMIN: "https://pub-ctrl-qa.vungle.io"
+  SLYDELL_MODEL_ACCOUNT_MAX_COUNT_OF_USERS: "50"
+  SLYDELL_STATS_ENDPOINT: 'prometheus-statsd-exporter.grafana.svc.cluster.local:9125'
+  SLYDELL_METADATA_HOST: "slydell-metadata-slydell"
+  SLYDELL_METADATA_SCHEMAS: "http"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+  probePort: 8080
+  protocol: TCP
+
+image:
+  repository: vungle/slydell
+  tag: PROJECT_TAG
+  pullPolicy: Always
+
+deployments:
+  alert:
+    replicas: 1
+    image:
+      args: [ ]
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_KAFKA_CHANGELOG_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+
+  auth:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: true
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+  admin:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: true
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+      SLYDELL_AWS_S3_REGION: "us-east-1"
+      SLYDELL_AWS_S3_JOBSBUCKET: "vungle2-cdn-qa"
+      SLYDELL_AWS_S3_JOBSFOLDER: "jobs-assets"
+
+  manage:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: true
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+
+  mediation:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: true
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+      SLYDELL_RATELIMIT_MAX: "1"
+
+  metacrawler:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: false
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources: {}
+    extraEnvs:
+      SLYDELL_METACRAWLER_CRAWLER_ENABLED: "false"
+      SLYDELL_METACRAWLER_CRAWLER_MATTERS_LIMIT: "10"
+      SLYDELL_METACRAWLER_CRAWLER_GOOGLE_PLAY_LINK: "https://play.google.com/store/apps/details?id="
+      SLYDELL_METACRAWLER_CRAWLER_EXPIRATION: "8h"
+      SLYDELL_METACRAWLER_KAFKA_NAME: "metacrawler"
+      SLYDELL_METACRAWLER_KAFKA_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_METACRAWLER_KAFKA_TOPIC: "db-pub-crawler-20220421"
+      SLYDELL_METACRAWLER_KAFKA_GROUP_ID: "metacrawler-group-qa"
+      SLYDELL_METACRAWLER_STATS_ENDPOINT: 'prometheus-statsd-exporter.grafana.svc.cluster.local:9125'
+      SLYDELL_METACRAWLER_STATS_NAME_SPACE: "slydell_metacrawler"
+      SLYDELL_METACRAWLER_STATS_BUFFER_SIZE: "1"
+      SLYDELL_METACRAWLER_MONGO_SCHEME: "mongodb+srv"
+      SLYDELL_METACRAWLER_MONGO_NAME: "qa-vvv-repl.becyx.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METACRAWLER_MONGO_TIMEOUT: "60s"
+      SLYDELL_METACRAWLER_MONGO_DATABASE: "vvv-repl"
+      SLYDELL_METACRAWLER_MONGO_COLLECTION_IOS_APP_DETAIL: "app_object_ios"
+      SLYDELL_METACRAWLER_MONGO_COLLECTION_ANDROID_APP_DETAIL: "app_object_android"
+      SLYDELL_METACRAWLER_MONGO_COLLECTION_AMAZON_APP_DETAIL: "app_object_amazon"
+      SLYDELL_METACRAWLER_CACHE_SIZE: "1000000"
+      SLYDELL_METACRAWLER_CACHE_COOLDOWN: "1h"
+      SLYDELL_METACRAWLER_PORT: "8080"
+
+  metadata:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: false
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_METADATA_CONSUMER_ENABLED: "false"
+      SLYDELL_METADATA_MONGO_DATABASE: "vvv-repl"
+      SLYDELL_METADATA_MONGO_NAME: "qa-vvv-repl.becyx.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METADATA_MONGO_SCHEME: "mongodb+srv"
+      SLYDELL_METADATA_KAFKA_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_METADATA_KAFKA_TOPIC: "ex-jaeger-app-bundles"
+      SLYDELL_METADATA_KAFKA_GROUP_ID: "metadata-group-qa"
+      SLYDELL_METADATA_STATS_ENDPOINT: 'prometheus-statsd-exporter.grafana.svc.cluster.local:9125'
+      SLYDELL_METADATA_STATS_NAME_SPACE: "applications.slydell"
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_ENDPOINT: 'keycloak-staging.gamerefinery.com'
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_BASEPATH: '/auth/realms/saas-pilot/protocol/openid-connect'
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_SSL: 'true'
+      SLYDELL_METADATA_GAMEREFINERY_API_ENDPOINT: 'proxy-us.gamerefinery.com'
+      SLYDELL_METADATA_GAMEREFINERY_API_BASEPATH: '/connectserver'
+      SLYDELL_METADATA_GAMEREFINERY_API_SSL: 'true'
+      SLYDELL_METADATA_AUTHENTICATOR_ENDPOINT: "slydell-authenticator-appqa-slydell"
+      SLYDELL_METADATA_AUTHENTICATOR_SSL: 'false'
+      SLYDELL_METADATA_KAFKAWRITER_NAME: 'meta_crawler'
+      SLYDELL_METADATA_KAFKAWRITER_BROKERS: 'brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092'
+      SLYDELL_METADATA_KAFKAWRITER_TOPIC: 'db-pub-crawler-20220421'
+      SLYDELL_METADATA_KAFKAWRITER_PROXY_URL: 'https://kfk-log-qa-us-west-2.vungle.io/'
+      SLYDELL_METADATA_KAFKAWRITER_PROXY_ENABLED: 'true'
+
+  reporting:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: true
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+      SLYDELL_MEDIVH_INTERNAL_SCHEMES: "https"
+      SLYDELL_MEDIVH_INTERNAL_HOST: report-int-qa.api.vungle.io
+
+  salesforce:
+    replicas: 1
+    service:
+      enabled: false
+    image:
+      args: []
+    ingress:
+      enabled: false
+      host:
+        url: example.com
+        path: /
+      tls:
+        - hosts:
+            - example.com
+          secretName: example
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_SALESFORCE_AUTH: "test.salesforce.com"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+
+  cron:
+    replicas: 0
+    image:
+      args: []
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_AWS_S3_REGION: "us-east-1"
+      SLYDELL_AWS_S3_PATH_PREFIX: "/"
+      SLYDELL_AWS_S3_ASSETSFOLDER: "cron-assets"
+      SLYDELL_AWS_S3_CDN: ""
+      SLYDELL_AWS_S3_BUCKET: "vungle2-cdn-qa"
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+
+  processor:
+    replicas: 0
+    image:
+      args: []
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_AWS_S3_REGION: "us-east-1"
+      SLYDELL_AWS_S3_JOBSBUCKET: "vungle2-cdn-qa"
+      SLYDELL_AWS_S3_JOBSFOLDER: "jobs-assets"
+      SLYDELL_MEDIVH_INTERNAL_ENDPOINT: "https://report-int-qa.api.vungle.io/int/pub/reports/performance"
+      SLYDELL_ADMIN_URL: "http://slydell-admin-slydell/api/v1/"
+
+  scheduler:
+    replicas: 0
+    image:
+      args: []
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+
+  authenticator:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_GAMEREFINERY_AUTH_ENDPOINT: "keycloak-staging.gamerefinery.com"
+      SLYDELL_GAMEREFINERY_AUTH_BASE_PATH: "/auth/realms/saas-pilot/protocol/openid-connect"
+      SLYDELL_GAMEREFINERY_AUTH_SSL: "true"
+
+  verifyvault:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: false
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    extraEnvs:
+      SLYDELL_VERIFYVAULT_STATS_ENDPOINT: "prometheus-statsd-exporter.grafana.svc.cluster.local:9125"
+      SLYDELL_VERIFYVAULT_STATS_NAME_SPACE: "applications.slydell"
+      SLYDELL_VERIFYVAULT_STATS_BUFFER_SIZE: "1"
+      SLYDELL_VERIFYVAULT_MONGO_SCHEME: "mongodb+srv"
+      SLYDELL_VERIFYVAULT_MONGO_NAME: "qa-vvv-repl.becyx.mongodb.net/vvv-repl?retryWrites=true&w=majority&minPoolSize=5"
+      SLYDELL_VERIFYVAULT_MONGO_TIMEOUT: "60s"
+      SLYDELL_VERIFYVAULT_MONGO_DATABASE: "vvv-repl"
+      SLYDELL_VERIFYVAULT_MONGO_COLLECTION_USER: "people"
+      SLYDELL_VERIFYVAULT_KAFKA_PROXY_KAFKA_URL: "https://kfk-log-qa-us-west-2.vungle.io/"
+      SLYDELL_VERIFYVAULT_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_VERIFYVAULT_KAFKA_CHNAGELOG_NAME: "changelog"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_TOPIC: "db-pub-notification"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_GROUP_ID: "db-pub-notification-group"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_NAME: "request"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_TOPIC: "slydell-request"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_NAME: "sys"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_TOPIC: "slydell-sys"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_BROKERS_LIST: "brokers-dmx-pe-qa-test-kafka.kafka-us-west-2b.vungle.io:9092"
+      SLYDELL_VERIFYVAULT_LOG_ENABLE_DEBUG: "false"
+      SLYDELL_VERIFYVAULT_LOG_ENABLE: "false"
+
+namespace: dashboard
+roleName: slydell-qa
+
+externalSecrets:
+  enabled: true
+  kind: SecretStore
+  secretStore: vault-backend
+  refreshInterval: 5m
+  dataFrom:
+  - extract:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: apps/dashboard/slydell

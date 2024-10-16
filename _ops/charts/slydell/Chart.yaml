@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for deploying slydell into multiple Kubernetes deployments
+name: slydell
+version: 0.8.5

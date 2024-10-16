@@ -1,0 +1,955 @@
+commonEnvs:
+  SLYDELL_MEDIVH_INTERNAL_SCHEMES: "https"
+  SLYDELL_AUTHENTICATOR_ENDPOINT: "slydell-authenticator-slydell"
+  SLYDELL_KAFKA_PROXY_KAFKA_URL: "http://httpkafka-proxy.appqa/"
+  SLYDELL_MONGO_NAME: "qa-vvv-repl.becyx.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+  SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa.vungle.io/?confirmation="
+  SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+  SLYDELL_PETER_URL_ADMIN: "https://pub-ctrl-qa.vungle.io"
+
+deployments:
+  alert:
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  admin:
+    ingress:
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+    image:
+      repository: 320005014399.dkr.ecr.us-east-1.amazonaws.com/slydell-admin
+      tag: qa
+  manage:
+    ingress:
+      className: vungle.io
+      host:
+        url: publisher-qa-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  mediation:
+    ingress:
+      className: vungle.io
+      host:
+        url: mediation-qa-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  metacrawler:
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+      SLYDELL_METACRAWLER_CRAWLER_ENABLED: "true"
+    extraSecret: "slydell-general-qa-new"
+  metadata:
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: metadata-qa-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+      SLYDELL_METADATA_CONSUMER_ENABLED: "true"
+    extraSecret: "slydell-general-qa-new"
+  reporting:
+    ingress:
+      className: vungle.io
+      host:
+        url: pub-reporting-qa-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa
+    extraSecret: "slydell-general-qa-new"
+  salesforce:
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_SALESFORCE_AUTH: "test.salesforce.com"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+    extraSecret: "slydell-general-qa-new"
+  cron:
+    replicas: 0 # closed default, only open at test phase.
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_AWS_S3_BUCKET: "vungle2-cdn-qa"
+      SLYDELL_AWS_S3_CDN: ""
+    extraSecret: "slydell-general-qa-new"
+  processor:
+    replicas: 1
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_AWS_S3_JOBSFOLDER: "jobs-assets"
+      SLYDELL_ADMIN_URL: "http://slydell-admin-slydell/api/v1/"
+    extraSecret: "slydell-general-qa-new"
+  scheduler:
+    replicas: 1
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "local-kafka-brokers:9092"
+    extraSecret: "slydell-general-qa-new"
+  authenticator:
+    replicas: 1
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+    extraSecret: "slydell-general-qa-new"
+  verifyvault:
+    replicas: 1
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: verifyvault-qa-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: "qa"
+    extraSecret: "slydell-general-qa-new"
+  alert-stage:
+    replicas: 1
+    image:
+      args: [ ]
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: stage
+      SLYDELL_KAFKA_CHANGELOG_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_KAFKA_CHANGELOG_GROUP_ID: "db-pub-notification-group-stage"
+      SLYDELL_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-stage"
+      SLYDELL_KAFKA_LOG_SYS_TOPIC: "slydell-sys-stage"
+      SLYDELL_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_PETER_URL_ADMIN: "https://pub-ctrl-stage.vungle.io"
+    extraSecret: "slydell-general-stage-new"
+  reporting-stage:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: pub-reporting-stage-api.vungle.io
+        path: /
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: stage
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-stage"
+      SLYDELL_KAFKA_LOG_SYS_TOPIC: "slydell-sys-stage"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+      SLYDELL_MEDIVH_INTERNAL_SCHEMES: "https"
+      SLYDELL_MEDIVH_INTERNAL_HOST: report-int-qa.api.vungle.io
+    extraSecret: "slydell-general-stage-new"
+  admin-stage:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-stage-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: stage
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-stage"
+      SLYDELL_KAFKA_TRACKING_TOPIC: "db-pub-tracking-stage"
+      SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-stage"
+      SLYDELL_KAFKA_LOG_SYS_TOPIC: "slydell-sys-stage"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-stage.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-stage.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+      SLYDELL_OKTA_SYNC_ENDPOINT: "https://auth-stage-api.vungle.io"
+      SLYDELL_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METADATA_HOST: "slydell-metadata-stage-slydell"
+    extraSecret: "slydell-general-stage-new"
+  admin-qa1:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa1-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa1
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa1.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa1-new"
+  admin-qa2:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa2-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa2
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa2.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa2-new"
+  admin-qa3:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa3-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa3
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa3.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa3-new"
+  admin-qa4:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa4-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa4
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa4.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa4-new"
+  admin-qa5:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa5-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa5
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa5.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa5-new"
+  admin-qa6:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa6-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa6
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa6.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa6-new"
+  admin-qa7:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa7-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa3
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa7.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa7-new"
+  admin-qa8:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa8-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa8
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa8.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa8-new"
+  admin-qa9:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa9-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa9
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa9.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa9-new"
+  admin-qa10:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+      host:
+        url: pub-ctrl-qa10-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa10
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://pub-ctrl-qa10.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa10-new"
+  manage-stage:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-stage-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: stage
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-stage"
+      SLYDELL_KAFKA_TRACKING_TOPIC: "db-pub-tracking-stage"
+      SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-stage"
+      SLYDELL_KAFKA_LOG_SYS_TOPIC: "slydell-sys-stage"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-stage.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-stage.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+      SLYDELL_OKTA_SYNC_ENDPOINT: "https://auth-stage-api.vungle.io"
+      SLYDELL_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METADATA_HOST: "slydell-metadata-stage-slydell"
+    extraSecret: "slydell-general-stage-new"
+  manage-qa1:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa1-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa1
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa1.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+  manage-qa2:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa2-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa2
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa2.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa2-new"
+  manage-qa3:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa3-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa3
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa3.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa3-new"
+  manage-qa4:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa4-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa4
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa4.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa4-new"
+  manage-qa5:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa5-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa5
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa5.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa5-new"
+  manage-qa6:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa6-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa6
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa6.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa6-new"
+  manage-qa7:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa7-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa7
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa7.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa7-new"
+  manage-qa8:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa8-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa8
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa8.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa8-new"
+  manage-qa9:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa9-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa9
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa9.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa9-new"
+  manage-qa10:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: publisher-qa10-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: qa10
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_PETER_URL_NEW_USER: "https://publisher-qa10.vungle.io/?confirmation="
+      SLYDELL_PETER_URL_RESET_PASSWORD: "https://app-qa.vungle.io/reset-password/?token="
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_TIPALTI_URL_SETUP: "https://ui2.sandbox.tipalti.com/payeedashboard/home"
+      SLYDELL_TIPALTI_URL_LIST: "https://ui.sandbox.tipalti.com/Payees/PaymentList.aspx"
+      SLYDELL_TIPALTI_URL_INVOICE: "https://ui2.sandbox.tipalti.com/PayeeDashboard/Invoices"
+      SLYDELL_RATELIMIT_ENABLED: "false"
+    extraSecret: "slydell-general-qa10-new"
+  mediation-stage:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: mediation-stage-api.vungle.io
+      tls: {}
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: stage
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-stage"
+      SLYDELL_KAFKA_TRACKING_TOPIC: "db-pub-tracking-stage"
+      SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-stage"
+      SLYDELL_KAFKA_LOG_SYS_TOPIC: "slydell-sys-stage"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_OKTA_SYNC_ENDPOINT: "https://auth-stage-api.vungle.io"
+      SLYDELL_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+    extraSecret: "slydell-general-stage-new"
+
+  metacrawler-stage:
+    replicas: 1
+    service:
+      enabled: true
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_METACRAWLER_CRAWLER_ENABLED: "true"
+      SLYDELL_METACRAWLER_CRAWLER_MATTERS_LIMIT: "10"
+      SLYDELL_METACRAWLER_CRAWLER_GOOGLE_PLAY_LINK: "https://play.google.com/store/apps/details?id="
+      SLYDELL_METACRAWLER_CRAWLER_EXPIRATION: "8h"
+      SLYDELL_METACRAWLER_KAFKA_NAME: "metacrawler"
+      SLYDELL_METACRAWLER_KAFKA_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_METACRAWLER_KAFKA_TOPIC: "db-pub-crawler-stage"
+      SLYDELL_METACRAWLER_KAFKA_GROUP_ID: "metacrawler-group-stage"
+      SLYDELL_METACRAWLER_STATS_ENDPOINT: 'prometheus-statsd-exporter.grafana.svc.cluster.local:9125'
+      SLYDELL_METACRAWLER_STATS_NAME_SPACE: "slydell_metacrawler"
+      SLYDELL_METACRAWLER_STATS_BUFFER_SIZE: "1"
+      SLYDELL_METACRAWLER_MONGO_SCHEME: "mongodb+srv"
+      SLYDELL_METACRAWLER_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METACRAWLER_MONGO_TIMEOUT: "60s"
+      SLYDELL_METACRAWLER_MONGO_DATABASE: "vvv-repl"
+      SLYDELL_METACRAWLER_MONGO_COLLECTION_IOS_APP_DETAIL: "app_object_ios"
+      SLYDELL_METACRAWLER_MONGO_COLLECTION_ANDROID_APP_DETAIL: "app_object_android"
+      SLYDELL_METACRAWLER_MONGO_COLLECTION_AMAZON_APP_DETAIL: "app_object_amazon"
+      SLYDELL_METACRAWLER_CACHE_SIZE: "1000000"
+      SLYDELL_METACRAWLER_CACHE_COOLDOWN: "1h"
+      SLYDELL_METACRAWLER_PORT: "8080"
+    extraSecret: "slydell-general-stage-new"
+
+  metadata-stage:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+      className: vungle.io
+      host:
+        url: metadata-stage-api.vungle.io
+      tls: {} 
+    resources: {}
+    extraEnvs:
+      SLYDELL_KUBE_GO_ENV: stage
+      SLYDELL_METADATA_CONSUMER_ENABLED: "false"
+      SLYDELL_METADATA_MONGO_DATABASE: "vvv-repl"
+      SLYDELL_METADATA_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_METADATA_MONGO_SCHEME: "mongodb+srv"
+      SLYDELL_METADATA_KAFKA_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_METADATA_KAFKA_TOPIC: "ex-jaeger-app-bundles-stage"
+      SLYDELL_METADATA_KAFKA_GROUP_ID: "metadata-group-stage"
+      SLYDELL_METADATA_STATS_ENDPOINT: 'prometheus-statsd-exporter.grafana.svc.cluster.local:9125'
+      SLYDELL_METADATA_STATS_NAME_SPACE: "applications.slydell"
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_ENDPOINT: 'keycloak-staging.gamerefinery.com'
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_BASEPATH: '/auth/realms/saas-pilot/protocol/openid-connect'
+      SLYDELL_METADATA_GAMEREFINERY_AUTH_SSL: 'true'
+      SLYDELL_METADATA_GAMEREFINERY_API_ENDPOINT: 'proxy-us.gamerefinery.com'
+      SLYDELL_METADATA_GAMEREFINERY_API_BASEPATH: '/connectserver'
+      SLYDELL_METADATA_GAMEREFINERY_API_SSL: 'true'
+      SLYDELL_METADATA_AUTHENTICATOR_ENDPOINT: "slydell-authenticator-stage-slydell"
+      SLYDELL_METADATA_AUTHENTICATOR_SSL: 'false'
+      SLYDELL_METADATA_KAFKAWRITER_NAME: 'meta_crawler'
+      SLYDELL_METADATA_KAFKAWRITER_BROKERS: 'local-kafka-brokers:9092'
+      SLYDELL_METADATA_KAFKAWRITER_TOPIC: 'db-pub-crawler-stage'
+      SLYDELL_METADATA_KAFKAWRITER_PROXY_URL: 'https://kfk-log-qa-us-west-2.vungle.io/'
+      SLYDELL_METADATA_KAFKAWRITER_PROXY_ENABLED: 'true'
+    extraSecret: "slydell-general-stage-new"
+
+  salesforce-stage:
+    replicas: 1
+    service:
+      enabled: false
+    image:
+      args: [ ]
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_SALESFORCE_AUTH: "test.salesforce.com"
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-stage"
+      SLYDELL_KAFKA_SALESFORCE_GROUP_ID: "db-pub-salesforce-group-stage"
+    extraSecret: "slydell-general-stage-new"
+  processor-stage:
+    replicas: 1
+    image:
+      args: [ ]
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_TOPIC: "db-pub-jobsubmitter-stage"
+      SLYDELL_KAFKA_JOB_DISPATCHER_TOPIC: "db-pub-jobdispatcher-stage"
+      SLYDELL_KAFKA_JOB_DISPATCHER_GROUP_ID: "db-pub-jobdispatcher-group-stage"
+      SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-stage"
+      SLYDELL_KAFKA_TRACKING_TOPIC: "db-pub-tracking-stage"
+      SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_AWS_S3_REGION: "us-east-1"
+      SLYDELL_AWS_S3_JOBSBUCKET: "vungle2-cdn-qa"
+      SLYDELL_AWS_S3_JOBSFOLDER: "jobs-assets"
+      SLYDELL_MEDIVH_INTERNAL_ENDPOINT: "https://report-int-qa.api.vungle.io/int/pub/reports/performance"
+      SLYDELL_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_ADMIN_URL: "http://slydell-admin-stage-slydell/api/v1/"
+    extraSecret: "slydell-general-stage-new"
+  scheduler-stage:
+    replicas: 1
+    image:
+      args: [ ]
+    service:
+      enabled: false
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_LOG_ENABLE_DEBUG: "true"
+      SLYDELL_LOG_ENABLED: "true"
+      SLYDELL_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_KAFKA_SALESFORCE_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_DISPATCHER_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_KAFKA_JOB_SUBMITTER_TOPIC: "db-pub-jobsubmitter-stage"
+      SLYDELL_KAFKA_JOB_SUBMITTER_GROUP_ID: "db-pub-jobsubmitter-group-stage"
+      SLYDELL_KAFKA_JOB_DISPATCHER_TOPIC: "db-pub-jobdispatcher-stage"
+      SLYDELL_KAFKA_JOB_DISPATCHER_GROUP_ID: "db-pub-jobdispatcher-group-stage"
+      SLYDELL_KAFKA_SALESFORCE_TOPIC: "db-pub-salesforce-stage"
+      SLYDELL_KAFKA_TRACKING_TOPIC: "db-pub-tracking-stage"
+      SLYDELL_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+    extraSecret: "slydell-general-stage-new"
+  authenticator-stage:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_GAMEREFINERY_AUTH_ENDPOINT: "keycloak-staging.gamerefinery.com"
+      SLYDELL_GAMEREFINERY_AUTH_BASE_PATH: "/auth/realms/saas-pilot/protocol/openid-connect"
+      SLYDELL_GAMEREFINERY_AUTH_SSL: "true"
+    extraSecret: "slydell-general-stage-new"
+  verifyvault-stage:
+    replicas: 1
+    image:
+      args: [ "--scheme", "http", "--write-timeout", "2m", "--host", "0.0.0.0", "--port", "80", "--keep-alive", "3m" ]
+    service:
+      enabled: true
+    ingress:
+      enabled: false
+    resources: {}
+    extraEnvs:
+      SLYDELL_VERIFYVAULT_STATS_ENDPOINT: "prometheus-statsd-exporter.grafana.svc.cluster.local:9125"
+      SLYDELL_VERIFYVAULT_STATS_NAME_SPACE: "applications.slydell"
+      SLYDELL_VERIFYVAULT_STATS_BUFFER_SIZE: "1"
+      SLYDELL_VERIFYVAULT_MONGO_SCHEME: "mongodb+srv"
+      SLYDELL_VERIFYVAULT_MONGO_NAME: "sanitized-qa-vvv-repl.mvp0k.mongodb.net/vvv-repl?retryWrites=true&w=majority"
+      SLYDELL_VERIFYVAULT_MONGO_TIMEOUT: "60s"
+      SLYDELL_VERIFYVAULT_MONGO_DATABASE: "vvv-repl"
+      SLYDELL_VERIFYVAULT_MONGO_COLLECTION_USER: "people"
+      SLYDELL_VERIFYVAULT_KAFKA_PROXY_KAFKA_URL: "https://kfk-log-qa-us-west-2.vungle.io/"
+      SLYDELL_VERIFYVAULT_KAFKA_PROXY_KAFKA_ENABLED: "true"
+      SLYDELL_VERIFYVAULT_KAFKA_CHNAGELOG_NAME: "changelog"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_TOPIC: "db-pub-notification-stage"
+      SLYDELL_VERIFYVAULT_KAFKA_CHANGELOG_GROUP_ID: "db-pub-notification-group-stage"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_NAME: "request"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_TOPIC: "slydell-request-stage"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_REQUEST_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_NAME: "sys"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_TOPIC: "slydell-sys-stage"
+      SLYDELL_VERIFYVAULT_KAFKA_LOG_SYS_BROKERS_LIST: "local-kafka-brokers:9092"
+      SLYDELL_VERIFYVAULT_LOG_ENABLE_DEBUG: "false"
+      SLYDELL_VERIFYVAULT_LOG_ENABLE: "false"
+    extraSecret: "slydell-general-stage-new"
+
+eksEnv: qa
+
+externalSecrets:
+  enabled: false

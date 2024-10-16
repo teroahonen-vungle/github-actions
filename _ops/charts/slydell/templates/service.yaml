@@ -1,0 +1,26 @@
+{{- range $deploymentName, $deployment := .Values.deployments }}
+{{- $namespace := print "-" $.Release.Namespace }}
+{{- $chartName := print $.Chart.Name "-" }}
+{{- if (and (gt $deployment.replicas 0.0) (or (eq $deploymentName (trimSuffix $namespace (trimPrefix $chartName $.Release.Name))) $.Values.multiDeploymentEnabled)) -}}
+{{- if $deployment.service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "slydell.fullname" $ }}
+  labels: {{ include "slydell.labels" $ | nindent 4 }}
+    deployment: {{ $deploymentName }}
+  annotations:
+{{ toYaml (default $.Values.service.annotations $deployment.service.annotations) | indent 4 }}
+spec:
+  type: {{ $.Values.service.type }}
+  sessionAffinity: {{ $deployment.service.sessionAffinity }}
+  ports:
+    - port: {{ $.Values.service.port }}
+      targetPort: {{ $.Values.service.targetPort }}
+      protocol: {{ $.Values.service.protocol }}
+  selector: {{ include "slydell.selectorLabels" $ | nindent 4 }}
+    deployment: {{ $deploymentName }}
+---
+{{ end }}
+{{ end }}
+{{ end }}
