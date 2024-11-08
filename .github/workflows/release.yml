@@ -29,3 +29,4 @@ jobs:
         run: |
           echo "version=${{ steps.version.outputs.version }}"
           echo "subject=${{ steps.version.outputs.subject }}"
+          echo "release=${{ steps.version.outputs.release }}"
