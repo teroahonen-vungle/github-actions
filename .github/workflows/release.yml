@@ -21,9 +21,12 @@ jobs:
       - name: Get version
         id: version
         run: |
-          echo "release=$(echo ${{ github.ref }} | cut -d/ -f3)" >> $GITHUB_OUTPUT
-          echo "version=$(echo $release | awk -F '[-]' '{print $2}')" >> $GITHUB_OUTPUT
-          echo "subject=$(echo $release | awk -F '[-]' '{print $1}')" >> $GITHUB_OUTPUT
+          release=$(echo ${{ github.ref }} | cut -d/ -f3)
+          version=$(echo $release | awk -F '[-]' '{print $2}')
+          subject=$(echo $release | awk -F '[-]' '{print $1}')
+          echo "release=$release" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "subject=$subject" >> $GITHUB_OUTPUT
       - name:
           Debug
         run: |
