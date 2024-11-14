@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "tag=$(echo ${{ github.ref }} | cut -d/ -f3)" >> $GITHUB_OUTPUT
-          if [[ ${{ github.ref }} == 'refs/tags/dev' ]]; then
+          if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
             echo "tag=qa" >> $GITHUB_OUTPUT
           fi
       - run: |  
