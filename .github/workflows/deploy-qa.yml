@@ -23,4 +23,4 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - name: Get short SHA
         run: 
-          skopeo --version
+          skopeo copy --help
