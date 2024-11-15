@@ -6,6 +6,11 @@ on:
     tags:
       - "qa"
   workflow_dispatch:
+    inputs:
+      extra_tags:
+        description: The commit/branch/tag we build for. Keep empty to use default branch.
+        type: string
+      
 permissions:
   id-token: write
   contents: write
@@ -24,3 +29,9 @@ jobs:
       - name: Get short SHA
         run: 
           skopeo copy --help
+      - name: Push extra tags
+        if: inputs.extra_tags != ''
+        run: |
+          for tag in ${{ inputs.extra_tags }}; do
+            #skopeo copy --multi-arch all ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.image_tag}} ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:$tag
+          done
