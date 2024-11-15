@@ -22,24 +22,5 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
       - name: Get short SHA
-        id: short-sha
-        shell: bash
-        run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "tag=$(echo ${{ github.ref }} | cut -d/ -f3)" >> $GITHUB_OUTPUT
-          if [[ ${{ github.ref }} == 'refs/heads/dev' ]]; then
-            echo "tag=qa" >> $GITHUB_OUTPUT
-          fi
-      - run: |  
-          echo ${{steps.short-sha.outputs.sha_short}}
-          echo ${{steps.short-sha.outputs.tag}} 
-  tag-commit:
-    if: ${{ ! contains(github.ref, 'tags')}}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Tag commit
-        run: |
-          git tag --force qa
-          git push --force --tags
+        run: 
+          skopeo --version
