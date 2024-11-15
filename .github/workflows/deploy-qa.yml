@@ -34,5 +34,5 @@ jobs:
         if: inputs.extra_tags != ''
         run: |
           for tag in ${{ inputs.extra_tags }}; do
-            #skopeo copy --multi-arch all ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.image_tag}} ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:$tag
+            echo "skopeo copy --multi-arch all ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.image_tag}} ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:$tag"
           done
