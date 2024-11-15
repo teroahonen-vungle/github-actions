@@ -6,6 +6,12 @@ on:
     tags:
       - "qa"
   workflow_dispatch:
+    inputs:
+      extra_tags:
+        description: The commit/branch/tag we build for. Keep empty to use default branch.
+        type: string
+        
+      
 permissions:
   id-token: write
   contents: write
@@ -13,19 +19,20 @@ permissions:
   pull-requests: read
 jobs:
   debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-  tag-commit:
-    if: ${{ ! contains(github.ref, 'tags')}}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Tag commit
+      - name: Get short SHA
+        run: 
+          skopeo copy --help
+      - name: Push extra tags
+        if: inputs.extra_tags != ''
         run: |
-          git tag --force qa
-          git push --force --tags
+          for tag in ${{ inputs.extra_tags }}; do
+            #skopeo copy --multi-arch all ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.image_tag}} ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:$tag
+          done
