@@ -15,9 +15,13 @@ jobs:
     name: Build and Publish Images
     strategy:
       matrix:
-        runners: 
-          - ubuntu-latest
-          - ubuntu-latest-2-core-arm
+        runners: [ubuntu-latest, ubuntu-latest-2-core-arm]
+        include:
+          - runners: ubuntu-latest
+            arch: amd64
+          - runners: ubuntu-latest-2-core-arm
+            arch: arm64
+          
     runs-on: ${{ matrix.runners }}
     steps:
       - name: Check out Repository Code
@@ -63,11 +67,13 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: binary-${{matrix.runners}}
+          name: binary-${{matrix.arch}}
           path: /home/runner/go/bin/slydell/admin
           
   publish:
     name: Build container js push
+    needs: 
+      - build
     runs-on: ubuntu-24.04
     steps:
       - name: Check out Repository Code
