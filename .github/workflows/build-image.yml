@@ -51,7 +51,7 @@ jobs:
           cmake --build . --config Release --target install
           mkdir /usr/local/include -p
           mkdir /usr/local/lib -p
-          sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
+          sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/.
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
           ls -la $GITHUB_WORKSPACE/brotli/out/installed/lib/
           ls -la $GITHUB_WORKSPACE/brotli/out/installed/include/
@@ -59,12 +59,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: brotli-lib-${{matrix.arch}}
-          path: $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli*
+          path: | 
+            $GITHUB_WORKSPACE/brotli/out/installed/lib
       - name: Upload brotli include
         uses: actions/upload-artifact@v4
         with:
           name: brotli-include-${{matrix.arch}}
-          path: $GITHUB_WORKSPACE/brotli/out/installed/include/brotli
+          path: |
+            $GITHUB_WORKSPACE/brotli/out/installed/include/brotli
     
       - name: Setup build env
         run: |
