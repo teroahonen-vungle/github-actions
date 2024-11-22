@@ -21,7 +21,7 @@ jobs:
       - name: Check out Repository Code
         uses: actions/checkout@v4
         with:
-          path: /home/runner/work/github-actions/github-actions/project
+          path: /tmp/project
       - name: Check out Repository Code
         uses: actions/checkout@v4
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          file: ./project/Dockerfile
+          file: /tmp/project/Dockerfile
           push: false
           build-args: |
             SERVICE=admin
