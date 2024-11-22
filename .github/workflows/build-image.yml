@@ -37,6 +37,7 @@ jobs:
       - run: go version
       - name: Install brotli
         run: | 
+          ls -la 
           mkdir -p /home/runner/go/src/github.com/Vungle/slydell
           cp -R . /home/runner/go/src/github.com/Vungle/slydell
           git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
@@ -61,11 +62,10 @@ jobs:
           CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
           ls -la /home/runner/go/bin/slydell/admin
           file /home/runner/go/bin/slydell/admin
+          
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: /home/runner/go
-          file: ./Dockerfile
           push: false
           build-args: |
             SERVICE=admin

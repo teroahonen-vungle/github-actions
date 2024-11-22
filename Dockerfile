@@ -6,7 +6,7 @@ RUN chmod 666 /tmp/uploads/
 ARG SERVICE
 
 # copy go binary
-COPY  bin/slydell/$SERVICE ./app
+COPY  /home/runner/go/bin/slydell/$SERVICE ./app
 # copy brotli
 COPY /usr/local/lib/libbrotli* /usr/local/lib/.
 COPY /usr/local/include/brotli /usr/local/include/.
