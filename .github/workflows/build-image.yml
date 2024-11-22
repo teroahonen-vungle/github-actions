@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Check out Repository Code
         uses: actions/checkout@v4
+      - name: Check out Repository Code
+        uses: actions/checkout@v4
         with:
           repository: 'Vungle/slydell'
           token: ${{ secrets.GH_TOKEN }}
@@ -59,3 +61,18 @@ jobs:
           CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
           ls -la /home/runner/go/bin/slydell/admin
           file /home/runner/go/bin/slydell/admin
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: /home/runner/go
+          file: ./Dockerfile
+          push: false
+          build-args: |
+            SERVICE=admin
+          tags: |
+            slydell-admin:latest
+          labels: | 
+            org.opencontainers.image.source=https://github.com/Vungle/slydell
+            org.opencontainers.image.title=Slydell Admin
+            org.opencontainers.image.version=latest
+            org.opencontainers.image.vendor=Liftoff
