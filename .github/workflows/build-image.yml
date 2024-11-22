@@ -53,6 +53,6 @@ jobs:
           GO111MODULE: on
           GOPRIVATE: github.com/Vungle/*
         run: |
-          pwd
           CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
-        
+          ls -la /home/runner/go/bin/slydell/admin
+          file /home/runner/go/bin/slydell/admin
