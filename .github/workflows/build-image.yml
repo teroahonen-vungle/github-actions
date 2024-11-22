@@ -21,7 +21,7 @@ jobs:
           repository: 'Vungle/slydell'
           token: ${{ secrets.GH_TOKEN }}
           ref: dev
-          path: $GITHUB_WORKSPACE/data/go/src/github.com/Vungle/slydell
+          path: /home/runner/go/src/github.com/Vungle/slydell
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -33,6 +33,7 @@ jobs:
       - run: go version
       - name: Install brotli
         run: | 
+          ls -la /home/runner/go/src/github.com/Vungle/slydell
           git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
           cd brotli
           mkdir out && cd out
@@ -41,8 +42,8 @@ jobs:
           mkdir /usr/local/include -p
           mkdir /usr/local/lib -p
           echo $(pwd)
-          cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
-          cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
+          sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
+          sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
           rm -rf brotli
       - name: Setup build env
         run: |
@@ -50,13 +51,12 @@ jobs:
           echo $GITHUB_WORKSPACE
           git config --global url.ssh://git@github.com/.insteadOf https://github.com/
       - name: Go build
-        working-directory: /home/runner/work/github-actions/github-actions/data/go/src/github.com/Vungle/slydell
+        working-directory: /home/runner/go/src/github.com/Vungle/slydell
         env: 
           GO111MODULE: on
           GOPRIVATE: github.com/Vungle/*
-          GOPATH: /home/runner/work/github-actions/github-actions/data/go
         run: |
           ls -la api
           pwd
-          CGO_ENABLED=1 GOOS=linux go build -o $GITHUB_WORKSPACE/data/go/bin/slydell/admin api/admincmd/admin-server/main.go
+          CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admincmd/admin-server/main.go
         
