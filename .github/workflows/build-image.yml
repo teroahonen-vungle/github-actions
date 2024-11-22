@@ -20,8 +20,8 @@ jobs:
         include:
           - runners: ubuntu-latest
             arch: amd64
-          - runners: ubuntu-latest-2-core-arm
-            arch: arm64
+#          - runners: ubuntu-latest-2-core-arm
+#            arch: arm64
           
     runs-on: ${{ matrix.runners }}
     steps:
