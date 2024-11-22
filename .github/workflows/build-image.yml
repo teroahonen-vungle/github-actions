@@ -21,7 +21,6 @@ jobs:
           repository: 'Vungle/slydell'
           token: ${{ secrets.GH_TOKEN }}
           ref: dev
-          path: /home/runner/go/src/github.com/Vungle/slydell
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -33,6 +32,7 @@ jobs:
       - run: go version
       - name: Install brotli
         run: | 
+          cp -R . /home/runner/go/src/github.com/Vungle/slydell
           ls -la /home/runner/go/src/github.com/Vungle/slydell
           git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
           cd brotli
