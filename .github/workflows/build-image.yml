@@ -53,7 +53,17 @@ jobs:
           mkdir /usr/local/lib -p
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
-          rm -rf brotli
+      - name: Upload brotli lib
+        uses: actions/upload-artifact@v4
+        with:
+          name: brotli-lib-${{matrix.arch}}
+          path: $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli*
+      - name: Upload brotli include
+        uses: actions/upload-artifact@v4
+        with:
+          name: brotli-include-${{matrix.arch}}
+          path: $GITHUB_WORKSPACE/brotli/out/installed/include/brotli
+    
       - name: Setup build env
         run: |
           git config --global url.ssh://git@github.com/.insteadOf https://github.com/
@@ -70,21 +80,6 @@ jobs:
         with:
           name: binary-${{matrix.arch}}
           path: /home/runner/go/bin/slydell/admin
-      - name: Upload brotli
-        uses: actions/upload-artifact@v4
-        with:
-          name: brotli-lib-${{matrix.arch}}
-          path: /usr/local/lib/libbrotli*
-      - name: Upload brotli lib
-        uses: actions/upload-artifact@v4
-        with:
-          name: brotli-lib-${{matrix.arch}}
-          path: /usr/local/lib/libbrotli*
-      - name: Upload brotli include
-        uses: actions/upload-artifact@v4
-        with:
-          name: brotli-include-${{matrix.arch}}
-          path: /usr/local/include/brotli
           
   publish:
     name: Build container js push
