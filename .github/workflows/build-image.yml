@@ -1,6 +1,4 @@
 name: Build and Publish Images
-run-name: ${{inputs.application}} - ${{inputs.image_tag}} - ${{inputs.git_ref}}
-
 on:
   workflow_dispatch: 
 permissions:
@@ -20,7 +18,7 @@ jobs:
       - name: Check out Repository Code
         uses: actions/checkout@v4
         with:
-          repository: 'https://github.com/Vungle/slydell.git'
+          repository: 'Vungle/slydell.git'
           ref: dev
       - name: Set up Go
         uses: actions/setup-go@v5
