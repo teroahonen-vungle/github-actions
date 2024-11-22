@@ -70,6 +70,21 @@ jobs:
         with:
           name: binary-${{matrix.arch}}
           path: /home/runner/go/bin/slydell/admin
+      - name: Upload brotli
+        uses: actions/upload-artifact@v4
+        with:
+          name: brotli-lib-${{matrix.arch}}
+          path: /usr/local/lib/libbrotli*
+      - name: Upload brotli lib
+        uses: actions/upload-artifact@v4
+        with:
+          name: brotli-lib-${{matrix.arch}}
+          path: /usr/local/lib/libbrotli*
+      - name: Upload brotli include
+        uses: actions/upload-artifact@v4
+        with:
+          name: brotli-include-${{matrix.arch}}
+          path: /usr/local/include/brotli
           
   publish:
     name: Build container js push
@@ -82,7 +97,9 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v4
       - run: |
-          ls -la
+          ls -la binary-amd64
+          ls -la brotli-lib-amd64
+          ls -la brotli-include-amd64
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
