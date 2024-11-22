@@ -13,7 +13,10 @@ env:
 jobs:
   build-and-publish:
     name: Build and Publish Images
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runners: [ubuntu-latest, ubuntu-latest-2-core-arm]
+    runs-on: ${{ matrix.runners }}
     steps:
       - name: Check out Repository Code
         uses: actions/checkout@v4
