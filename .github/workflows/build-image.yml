@@ -25,4 +25,36 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.21' # The Go version to download (if necessary) and use.
+      - name: ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_KEY }}
       - run: go version
+      - name: Install brotli
+        run: | 
+          env
+          git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
+          cd brotli
+          mkdir out && cd out
+          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./installed ..
+          cmake --build . --config Release --target install
+          mkdir /usr/local/include -p
+          mkdir /usr/local/lib -p
+          echo $(pwd)
+          cp -r ./brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
+          cp -r ./brotli/out/installed/include/brotli /usr/local/include/.
+          rm -rf brotli
+      - name: Setup build env
+        run: |
+          git config --global url.ssh://git@github.com/.insteadOf https://github.com/
+      - name: Go build
+        env: 
+          GO111MODULE: on
+          GOPRIVATE: github.com/Vungle/*
+        run: |
+          CGO_ENABLED=1 GOOS=linux go build -o /data/go/bin/slydell/admin api/admincmd/admin-server/main.go
+          
+
+
+
+
