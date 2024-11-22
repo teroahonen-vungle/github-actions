@@ -15,7 +15,8 @@ jobs:
     name: Build and Publish Images
     strategy:
       matrix:
-        runners: [ubuntu-latest, ubuntu-latest-2-core-arm]
+        #runners: [ubuntu-latest, ubuntu-latest-2-core-arm]
+        runners: [ubuntu-latest]
         include:
           - runners: ubuntu-latest
             arch: amd64
