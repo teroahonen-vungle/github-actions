@@ -34,7 +34,6 @@ jobs:
         run: | 
           mkdir -p /home/runner/go/src/github.com/Vungle/slydell
           cp -R . /home/runner/go/src/github.com/Vungle/slydell
-          ls -la /home/runner/go/src/github.com/Vungle/slydell
           git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
           cd brotli
           mkdir out && cd out
@@ -42,14 +41,11 @@ jobs:
           cmake --build . --config Release --target install
           mkdir /usr/local/include -p
           mkdir /usr/local/lib -p
-          echo $(pwd)
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
           rm -rf brotli
       - name: Setup build env
         run: |
-          echo $HOME
-          echo $GITHUB_WORKSPACE
           git config --global url.ssh://git@github.com/.insteadOf https://github.com/
       - name: Go build
         working-directory: /home/runner/go/src/github.com/Vungle/slydell
@@ -57,7 +53,6 @@ jobs:
           GO111MODULE: on
           GOPRIVATE: github.com/Vungle/*
         run: |
-          ls -la api
           pwd
-          CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admincmd/admin-server/main.go
+          CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
         
