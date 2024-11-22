@@ -2,48 +2,7 @@ name: Build and Publish Images
 run-name: ${{inputs.application}} - ${{inputs.image_tag}} - ${{inputs.git_ref}}
 
 on:
-  workflow_dispatch:
-    inputs:
-      git_ref:
-        description: The commit/branch/tag we build for. Keep empty to use default branch.
-        type: string
-      service:
-        description: The service we build for.
-        type: string
-        required: true
-      environment:
-        description: Target environment
-        type: choice
-        options:
-          - qa
-          - stage
-          - production
-          - feature
-        required: true
-        default: "qa"
-      image_tag:
-        description: The image tag to build
-        type: string
-        required: true
-  workflow_call:
-    inputs:
-      git_ref:
-        description: The commit/branch/tag we build for. Keep empty to use default branch.
-        type: string
-        required: true
-      service:
-        description: The service we build for.
-        type: string
-        required: true
-      environment:
-        description: Target environment
-        type: string
-        required: true
-        default: "qa"
-      image_tag:
-        description: The image tag to build
-        type: string
-        required: true
+  workflow_dispatch: 
 permissions:
   id-token: write
   contents: write
@@ -59,46 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out Repository Code
-        uses: actions/checkout@v3  # https://github.com/actions/checkout
+        uses: actions/checkout@v4
         with:
-          ref: ${{inputs.git_ref}}
-      - run: |
-          echo "Building and Publishing Images with tag ${{inputs.image_tag}} from ${{inputs.git_ref}}"
-      - name: Assume github action role
-        uses: aws-actions/configure-aws-credentials@v4
+          repository: 'https://github.com/Vungle/slydell.git'
+          ref: dev
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          role-to-assume: "arn:aws:iam::320005014399:role/github-action"
-          aws-region: us-east-1
-          mask-aws-account-id: false
-          role-session-name: github-action
-
-      - name: Assume ecr-push role
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ env.AWS_SESSION_TOKEN }}
-          role-to-assume: "arn:aws:iam::320005014399:role/ecr-push"
-          role-skip-session-tagging: true
-          role-duration-seconds: 3600
-          aws-region: us-east-1
-      - name: Login to ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
- 
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.action
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            SERVICE=${{ inputs.service }} 
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/slydell-${{ inputs.service }}:${{inputs.image_tag}}
-          labels: | 
-            org.opencontainers.image.source=https://github.com/Vungle/slydell
-            org.opencontainers.image.title=Slydell ${{ inputs.service }}
-            org.opencontainers.image.version=${{inputs.environment}}-${{ steps.short-sha.outputs.sha_short }}
-            org.opencontainers.image.vendor=Liftoff  
+          go-version: '1.21' # The Go version to download (if necessary) and use.
+      - run: go version
