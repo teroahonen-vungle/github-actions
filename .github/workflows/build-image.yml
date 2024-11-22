@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Check out Repository Code
         uses: actions/checkout@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           repository: 'Vungle/slydell.git'
           ref: dev
