@@ -53,6 +53,8 @@ jobs:
           mkdir /usr/local/lib -p
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/. && \
           sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
+          ls -la $GITHUB_WORKSPACE/brotli/out/installed/lib/
+          ls -la $GITHUB_WORKSPACE/brotli/out/installed/include/
       - name: Upload brotli lib
         uses: actions/upload-artifact@v4
         with:
