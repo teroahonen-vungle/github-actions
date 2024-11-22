@@ -21,14 +21,9 @@ jobs:
       - name: Check out Repository Code
         uses: actions/checkout@v4
         with:
-          path: project
-      - name: Check out Repository Code
-        uses: actions/checkout@v4
-        with:
           repository: 'Vungle/slydell'
           token: ${{ secrets.GH_TOKEN }}
           ref: dev
-          path: slydell
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -40,9 +35,8 @@ jobs:
       - run: go version
       - name: Install brotli
         run: | 
-          ls -la 
           mkdir -p /home/runner/go/src/github.com/Vungle/slydell
-          cp -R ./slydell/* /home/runner/go/src/github.com/Vungle/slydell
+          cp -R . /home/runner/go/src/github.com/Vungle/slydell
           git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
           cd brotli
           mkdir out && cd out
@@ -62,15 +56,15 @@ jobs:
           GO111MODULE: on
           GOPRIVATE: github.com/Vungle/*
         run: |
-          ls -la /home/runner/go/src/github.com/Vungle/slydell
           CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
-          ls -la /home/runner/go/bin/slydell/admin
           file /home/runner/go/bin/slydell/admin
           
+      - name: Check out Repository Code
+        uses: actions/checkout@v4
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          file: ./project/Dockerfile
+          file: Dockerfile
           push: false
           build-args: |
             SERVICE=admin
