@@ -11,11 +11,13 @@ env:
   HELM_EXPERIMENTAL_OCI: 1
 
 jobs:
-  build-and-publish:
+  build:
     name: Build and Publish Images
     strategy:
       matrix:
-        runners: [ubuntu-latest, ubuntu-latest-2-core-arm]
+        runners: 
+          - ubuntu-latest
+          - ubuntu-latest-2-core-arm
     runs-on: ${{ matrix.runners }}
     steps:
       - name: Check out Repository Code
@@ -58,13 +60,26 @@ jobs:
         run: |
           CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
           file /home/runner/go/bin/slydell/admin
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{matrix.runners}}
+          path: /home/runner/go/bin/slydell/admin
           
+  publish:
+    name: Build container js push
+    runs-on: ubuntu-24.04
+    steps:
       - name: Check out Repository Code
         uses: actions/checkout@v4
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+      - run: |
+          ls -la
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          file: Dockerfile
+          file: ./Dockerfile
           push: false
           build-args: |
             SERVICE=admin
