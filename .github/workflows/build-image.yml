@@ -21,13 +21,14 @@ jobs:
       - name: Check out Repository Code
         uses: actions/checkout@v4
         with:
-          path: /tmp/project
+          path: project
       - name: Check out Repository Code
         uses: actions/checkout@v4
         with:
           repository: 'Vungle/slydell'
           token: ${{ secrets.GH_TOKEN }}
           ref: dev
+          path: slydell
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -41,7 +42,7 @@ jobs:
         run: | 
           ls -la 
           mkdir -p /home/runner/go/src/github.com/Vungle/slydell
-          cp -R . /home/runner/go/src/github.com/Vungle/slydell
+          cp -R ./slydell /home/runner/go/src/github.com/Vungle/slydell
           git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
           cd brotli
           mkdir out && cd out
