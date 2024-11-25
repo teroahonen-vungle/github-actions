@@ -30,6 +30,6 @@ jobs:
       run: |
         echo ${{steps.env_calc.outputs.env_in_tag}}  
     - name:
-      if: github.ref == 'refs/tags/qa*'
+      if: ${{ ! contains(github.ref, 'tags')}}
       run: |
         echo "Tag pushed"
