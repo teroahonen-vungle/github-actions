@@ -1,0 +1,48 @@
+name: Build and Publish Images For Each PR
+run-name: Images B&P - ${{github.actor}} - ${{github.event.pull_request.number}} - ${{github.event.pull_request.head.sha}}
+
+on:
+  pull_request:
+    branches:
+      - '**'
+      - '!master'
+  workflow_dispatch:
+
+jobs:
+  init-build:
+    runs-on: ubuntu-latest
+    outputs:
+      image_type: ${{steps.export_image_type.outputs.BUILD_SCOPE}}
+    steps:
+      - name: Check out Repository Code
+        uses: actions/checkout@v4
+      - name: Execute when tag
+        # if PR has label qa, build qa image
+        if: ${{contains(github.event.pull_request.labels.*.name, 'qa') }}
+        run: |
+          echo "3" > /tmp/image_type
+      - name: Execute when no tag
+        if: ${{! contains(github.event.pull_request.labels.*.name, 'qa') }}
+        run: |
+          echo "2" > /tmp/image_type
+      - name: Export image type
+        id: export_image_type
+        run: |
+          echo "image_type=$(cat /tmp/image_type)" >> $GITHUB_OUTPUT
+  trigger-build-and-publish:
+    runs-on: ubuntu-latest
+    needs: 
+      - init-build
+    steps:
+      - run: |
+          echo "${{needs.init-build.outputs.image_type}}"
+  tag-commit:
+    if: ${{contains(github.event.pull_request.labels.*.name, 'qa') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Tag commit
+        run: |
+          git tag --force qa
+          git push --force --tags

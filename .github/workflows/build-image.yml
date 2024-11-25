@@ -32,4 +32,4 @@ jobs:
     - name:
       if: ${{ ! contains(github.ref, 'tags')}}
       run: |
-        echo "Tag pushed"
+        echo "No tag"
