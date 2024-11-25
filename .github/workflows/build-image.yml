@@ -1,4 +1,4 @@
-name: Build and Publish Images
+name: Test
 on:
   workflow_dispatch: 
 permissions:
@@ -12,104 +12,16 @@ env:
 
 jobs:
   build:
-    name: Build and Publish Images
-    strategy:
-      matrix:
-        #runners: [ubuntu-latest, ubuntu-latest-2-core-arm]
-        runners: [ubuntu-latest]
-        include:
-          - runners: ubuntu-latest
-            arch: amd64
-#          - runners: ubuntu-latest-2-core-arm
-#            arch: arm64
-          
-    runs-on: ${{ matrix.runners }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out Repository Code
-        uses: actions/checkout@v4
-        with:
-          repository: 'Vungle/slydell'
-          token: ${{ secrets.GH_TOKEN }}
-          ref: dev
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21' # The Go version to download (if necessary) and use.
-      - name: ssh-agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.PRIVATE_KEY }}
-      - run: go version
-      - name: Install brotli
-        run: | 
-          mkdir -p /home/runner/go/src/github.com/Vungle/slydell
-          cp -R . /home/runner/go/src/github.com/Vungle/slydell
-          git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
-          cd brotli
-          mkdir out && cd out
-          cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./installed ..
-          cmake --build . --config Release --target install
-          mkdir /usr/local/include -p
-          mkdir /usr/local/lib -p
-          sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/lib/libbrotli* /usr/local/lib/.
-          sudo cp -r $GITHUB_WORKSPACE/brotli/out/installed/include/brotli /usr/local/include/.
-          ls -la $GITHUB_WORKSPACE/brotli/out/installed/lib/
-          ls -la $GITHUB_WORKSPACE/brotli/out/installed/include/
-      - name: Upload brotli lib
-        uses: actions/upload-artifact@v4
-        with:
-          name: brotli-lib-${{matrix.arch}}
-          path: | 
-            $GITHUB_WORKSPACE/brotli/out/installed/lib
-      - name: Upload brotli include
-        uses: actions/upload-artifact@v4
-        with:
-          name: brotli-include-${{matrix.arch}}
-          path: |
-            $GITHUB_WORKSPACE/brotli/out/installed/include/brotli
-    
-      - name: Setup build env
-        run: |
-          git config --global url.ssh://git@github.com/.insteadOf https://github.com/
-      - name: Go build
-        working-directory: /home/runner/go/src/github.com/Vungle/slydell
-        env: 
-          GO111MODULE: on
-          GOPRIVATE: github.com/Vungle/*
-        run: |
-          CGO_ENABLED=1 GOOS=linux go build -o /home/runner/go/bin/slydell/admin api/admin/cmd/admin-server/main.go
-          file /home/runner/go/bin/slydell/admin
-      - name: Upload binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: binary-${{matrix.arch}}
-          path: /home/runner/go/bin/slydell/admin
-          
-  publish:
-    name: Build container js push
-    needs: 
-      - build
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out Repository Code
-        uses: actions/checkout@v4
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v4
-      - run: |
-          ls -la binary-amd64
-          ls -la brotli-lib-amd64
-          ls -la brotli-include-amd64
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          file: ./Dockerfile
-          push: false
-          build-args: |
-            SERVICE=admin
-          tags: |
-            slydell-admin:latest
-          labels: | 
-            org.opencontainers.image.source=https://github.com/Vungle/slydell
-            org.opencontainers.image.title=Slydell Admin
-            org.opencontainers.image.version=latest
-            org.opencontainers.image.vendor=Liftoff
+    - name: Define RC or QA image tag
+      id: env_calc
+      run: |
+        if [[ ${{github.ref}} == refs/tags/qa* ]]; then
+          echo "env_in_tag=qa" >> $GITHUB_OUTPUT
+        else
+          echo "env_in_tag=rc" >> $GITHUB_OUTPUT
+        fi
+    - name:
+      run: |
+        echo ${{steps.env_calc.outputs.env_in_tag}}  
