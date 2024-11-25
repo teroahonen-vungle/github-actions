@@ -12,7 +12,7 @@ jobs:
   init-build:
     runs-on: ubuntu-latest
     outputs:
-      image_type: ${{steps.export_image_type.outputs.BUILD_SCOPE}}
+      image_type: ${{steps.export_image_type.outputs.image_type}}
     steps:
       - name: Check out Repository Code
         uses: actions/checkout@v4
