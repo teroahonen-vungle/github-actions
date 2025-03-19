@@ -1,35 +1,17 @@
-name: Test
+name: Fail
 on:
   push:
     branches:
       - 'main'
-    tags:
-      - qa 
 permissions:
   id-token: write
   contents: write
-  # https://stackoverflow.com/questions/72248956/github-action-with-docker-makes-error-exporting-to-image-403-forbidden-error
   packages: write
   pull-requests: read
-env:
-  HELM_EXPERIMENTAL_OCI: 1
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Define RC or QA image tag
-      id: env_calc
+    - name: Fail
       run: |
-        if [[ ${{github.ref}} == refs/tags/qa* ]]; then
-          echo "env_in_tag=qa" >> $GITHUB_OUTPUT
-        else
-          echo "env_in_tag=rc" >> $GITHUB_OUTPUT
-        fi
-    - name:
-      run: |
-        echo ${{steps.env_calc.outputs.env_in_tag}}  
-    - name:
-      if: ${{ ! contains(github.ref, 'tags')}}
-      run: |
-        echo "No tag"
+        system exit 1
