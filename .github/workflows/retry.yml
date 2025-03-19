@@ -25,5 +25,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh run rerun ${{ github.event.workflow_run.id }}
+        gh run rerun ${{ github.event.workflow_run.id }} --failed
 
