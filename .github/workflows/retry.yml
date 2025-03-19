@@ -1,0 +1,23 @@
+name: Fail
+on:
+  workflow_run:
+    workflows: ["fail"]
+    branches:
+      - main
+    types:
+      - completed
+
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+  pull-requests: read
+jobs:
+  retry:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Retry check
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
+      run: echo "$GITHUB_CONTEXT"
+
