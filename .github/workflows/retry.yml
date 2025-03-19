@@ -16,8 +16,12 @@ jobs:
   retry:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.workflow_run.head_branch }}
     - name: Retry
-      if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+      if: ${{ github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt < 4 }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
