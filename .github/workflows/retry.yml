@@ -1,4 +1,4 @@
-name: Fail
+name: Retry
 on:
   workflow_run:
     workflows: ["fail"]
