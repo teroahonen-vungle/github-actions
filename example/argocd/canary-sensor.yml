@@ -1,0 +1,228 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  labels:
+    argocd.argoproj.io/instance: argo-sensors-qa
+  name: jira-deployment-controller
+  namespace: argo
+spec:
+  dependencies:
+  - eventName: deployments
+    eventSourceName: webhook-jira
+    name: dep
+  template:
+    serviceAccountName: operate-workflow-sa
+  triggers:
+  - template:
+      k8s:
+        operation: create
+        parameters:
+        - dest: spec.arguments.parameters.0.value
+          src:
+            dataKey: body.service
+            dependencyName: dep
+        - dest: spec.arguments.parameters.1.value
+          src:
+            dataKey: body.action
+            dependencyName: dep
+        - dest: spec.arguments.parameters.2.value
+          src:
+            dataKey: body.issue
+            dependencyName: dep
+        - dest: spec.arguments.parameters.3.value
+          src:
+            dataKey: body.issue_id
+            dependencyName: dep
+        - dest: spec.arguments.parameters.4.value
+          src:
+            dataKey: body.to_version
+            dependencyName: dep
+        - dest: spec.arguments.parameters.5.value
+          src:
+            dataKey: body.from_version
+            dependencyName: dep
+        - dest: spec.arguments.parameters.6.value
+          src:
+            dataKey: body.comment
+            dependencyName: dep
+        - dest: metadata.labels.action
+          src:
+            dataKey: body.action
+            dependencyName: dep
+        - dest: metadata.labels.service
+          src:
+            dataKey: body.service
+            dependencyName: dep
+        - dest: metadata.labels.issue
+          src:
+            dataKey: body.issue
+            dependencyName: dep
+        source:
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: deployment-controller-
+            spec:
+              arguments:
+                parameters:
+                - name: service
+                  value: ""
+                - name: action
+                  value: ""
+                - name: issue
+                  value: ""
+                - name: issue_id
+                  value: ""
+                - name: to_version
+                  value: ""
+                - name: from_version
+                  value: ""
+                - name: comment
+                  value: ""
+              entrypoint: execute
+              onExit: exit-handler
+              podGC:
+                deleteDelayDuration: 600s
+                strategy: OnWorkflowSuccess
+              serviceAccountName: jira-deployments
+              templates:
+              - name: exit-handler
+                steps:
+                - - arguments:
+                      parameters:
+                      - name: data
+                        value: |
+                          {"body":"Promotion done, https://workflows.qa.vungle.io/workflows/argo/{{ workflow.name }}?tab=workflow&sidePanel=logs"}
+                      - name: url
+                        value: https://vungle.atlassian.net/rest/api/latest/issue/{{workflow.parameters.issue}}/comment
+                    name: workflow-success
+                    template: curl
+                    when: '{{workflow.status}} == Succeeded'
+                - - arguments:
+                      parameters:
+                      - name: data
+                        value: |
+                          {"body":Promotion done FAILED!, https://workflows.qa.vungle.io/workflows/argo/{{ workflow.name }}?tab=workflow&sidePanel=logs"}
+                      - name: url
+                        value: https://vungle.atlassian.net/rest/api/latest/issue/{{workflow.parameters.issue}}/comment
+                    name: workflow-failed
+                    template: curl
+                    when: '{{workflow.status}} != Succeeded'
+              - name: execute
+                steps:
+                - - arguments:
+                      parameters:
+                      - name: data
+                        value: |
+                          {"body":Promotion starting,  https://workflows.qa.vungle.io/workflows/argo/{{ workflow.name }}?tab=workflow&sidePanel=logs"}
+                      - name: url
+                        value: https://vungle.atlassian.net/rest/api/latest/issue/{{workflow.parameters.issue}}/comment
+                    name: start-comment
+                    template: curl
+                - - arguments:
+                      parameters:
+                      - name: service
+                        value: '{{workflow.parameters.service}}'
+                      - name: action
+                        value: '{{workflow.parameters.action}}'
+                      - name: issue
+                        value: '{{workflow.parameters.issue}}'
+                      - name: issue_id
+                        value: '{{workflow.parameters.issue_id}}'
+                      - name: to_version
+                        value: '{{workflow.parameters.to_version}}'
+                      - name: from_version
+                        value: '{{workflow.parameters.from_version}}'
+                      - name: comment
+                        value: '{{workflow.parameters.comment}}'
+                    name: run-script
+                    template: run-script
+                - - arguments:
+                      parameters:
+                      - name: data
+                        value: |
+                          {"update":{"comment": [{"add":{"body":"Deployment started."}}]},"transition": {"id":"41"}}
+                      - name: url
+                        value: https://vungle.atlassian.net/rest/api/latest/issue/{{workflow.parameters.issue}}/transitions
+                    name: started
+                    template: curl
+                    when: '{{workflow.parameters.action}} == start && {{steps.run-script.status}}
+                      == Succeeded'
+              - inputs:
+                  parameters:
+                  - name: service
+                  - name: action
+                  - name: issue
+                  - name: issue_id
+                  - name: to_version
+                  - name: from_version
+                  - name: comment
+                name: run-script
+                script:
+                  env:
+                  - name: ARGOCD_SERVER
+                    value: argocd.ops.vungle.io
+                  command:
+                  - bash
+                  envFrom:
+                  - secretRef:
+                      name: argocd-token
+                  image: 320005014399.dkr.ecr.us-east-1.amazonaws.com/tools/canary-tool:latest
+                  source: |
+                    echo 'export SERVICE={{inputs.parameters.service}}' >> run.env
+                    echo 'export ACTION={{inputs.parameters.action}}' >> run.env
+                    echo 'export ISSUE={{inputs.parameters.issue}}' >> run.env
+                    echo 'export ISSUE_ID={{inputs.parameters.issue_id}}' >> run.env
+                    echo 'export TO_VERSION={{inputs.parameters.to_version}}' >> run.env
+                    echo 'export FROM_VERSION={{inputs.parameters.from_version}}' >> run.env
+                    COMMAND_TMP="{{inputs.parameters.comment}}"
+                    COMMAND=${COMMAND_TMP#"/step"}
+                    echo 'export COMMAND="$COMMAND"' >> run.env
+                    source run.env
+                    cp /tmp/scripts/run.sh run_tmp.sh
+                    chmod +x run_tmp.sh
+                    ./run_tmp.sh
+                  volumeMounts:
+                  - mountPath: /tmp/scripts/
+                    name: script
+                    readOnly: false
+                volumes:
+                - configMap:
+                    name: '{{inputs.parameters.service}}-{{inputs.parameters.action}}'
+                  name: script
+              - container:
+                  args:
+                  - -L
+                  - -D-
+                  - --http1.1
+                  - -H
+                  - 'Content-Type: application/json'
+                  - -H
+                  - 'Authorization: $(JIRA_TOKEN)'
+                  - -d
+                  - '{{inputs.parameters.data}}'
+                  - '{{inputs.parameters.url}}'
+                  command:
+                  - curl
+                  env:
+                  - name: JIRA_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        key: token
+                        name: jira-token
+                  image: curlimages/curl:7.87.0
+                inputs:
+                  parameters:
+                  - name: data
+                  - name: url
+                name: curl
+              ttlStrategy:
+                secondsAfterCompletion: 600
+                secondsAfterFailure: 600
+                secondsAfterSuccess: 600
+              volumes:
+              - name: github-secret
+                secret:
+                  secretName: github-private-key
+      name: deployment-controller

@@ -1,0 +1,66 @@
+# Default values for example.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 10
+image:
+  repository: 320005014399.dkr.ecr.us-east-1.amazonaws.com/ghcr/vungle/canary-demo
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v10.0.0"
+eksEnv: eks-qa-us-east-1b
+ticket: placeholder
+action: placeholder
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+commonLabels:
+  liftoff.io/team: pe
+  liftoff.io/service: canaery-demo
+  liftoff.io/env: qa
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+podAnnotations:
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8080
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+nodeSelector: {}
+tolerations: []
+affinity: {}
+notifications:
+canarySteps:
+  - setWeight: 20
+  - pause:
+      duration: 30s
+  - setWeight: 40
+  - pause:
+      duration: 30s
+  - setWeight: 60
+  - pause:
+      duration: 30s
+  - setWeight: 80
+  - pause:
+      duration: 30s
+  - setWeight: 100

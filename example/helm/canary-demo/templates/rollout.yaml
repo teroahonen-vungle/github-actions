@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "canary-demo.fullname" . }}
+  labels:
+    {{- if .Values.ticket }}
+    liftoff.io/deploy-ticket: {{ .Values.ticket }}
+    {{- end }}
+    {{- if .Values.action }}
+    liftoff.io/deploy-action: {{ .Values.action }}
+    {{- end }}
+    {{- include "canary-demo.labels" . | nindent 4 }}
+    liftoff.io/eks: {{ .Values.eksEnv }}
+  annotations:
+    {{- with .Values.notifications }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    canary:
+      steps:
+      {{- toYaml .Values.canarySteps | nindent 8 }}  
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      {{- include "canary-demo.selectorLabels" . | nindent 8 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "canary-demo.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: workload
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        resources:
+          requests:
+            memory: 32Mi
+            cpu: 5m

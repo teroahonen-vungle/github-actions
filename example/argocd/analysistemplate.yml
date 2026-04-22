@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: random-success
+spec:
+  metrics:
+    - name: random-success
+      # Run the check once (adjust as desired)
+      count: 1
+      # If the Job exits non-zero once, mark the metric failed
+      failureLimit: 1
+      successCondition: result[0] = -1
+      failureCondition: result[0] = -2
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: success-75
+                    image: bash:5.2
+                    command:
+                      - bash
+                      - -c
+                      - |
+                        r=$((RANDOM % 100))
+                        echo "random=$r"
+                        if [ "$r" -lt 75 ]; then
+                          echo "✅ success (exit 0)"
+                          exit 0
+                        else
+                          echo "❌ failure (exit 1)"
+                          exit 1
+                        fi

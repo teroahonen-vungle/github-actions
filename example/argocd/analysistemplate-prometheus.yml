@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: memory-usage
+spec:
+  args:
+    - name: service
+    - name: cluster
+  metrics:
+    - name: success-rate
+      interval: 5m
+      # NOTE: prometheus queries return results in the form of a vector.
+      # So it is common to access the index 0 of the returned array to obtain the value
+      successCondition: len(result) == 0 || result[0] < 0
+      failureCondition: len(result) == 0 || result[0] < 0
+      failureLimit: 0
+      count: 1
+      provider:
+        prometheus:
+          address: http://mimir.qa.vungle.io/prometheus/
+          # timeout is expressed in seconds
+          query: |
+            container_memory_working_set_bytes{pod=~"{{args.service}}-{{args.cluster}}-.*"} /1024/1024

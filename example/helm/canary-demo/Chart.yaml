@@ -1,0 +1,9 @@
+apiVersion: v2
+name: canary-demo
+description: Helm chart for rollouts canary-demo
+maintainers:
+  - name: teroahonen-vungle
+    email: tahonen@liftoff.io
+type: application
+version: "v10.0.0"
+appVersion: "v10.0.0"

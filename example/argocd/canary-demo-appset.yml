@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: canary-demo
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: eks-prod-us-east-1b
+          - name: eks-prod-us-east-1c
+          - name: eks-prod-us-east-1d
+          - name: eks-prod-us-east-1f
+  goTemplate: true
+  template:
+    metadata:
+      name: 'canary-demo-{{.name}}'
+      labels:
+        name: 'canary-demo-{{.name}}'
+        liftoff.io/env: qa
+        liftoff.io/service: canary-demo
+        liftoff.io/team: pe
+      annotations:
+        notifications.argoproj.io/subscribe.on-sync-succeeded-jira.atlassian: ''
+        notifications.argoproj.io/subscribe.on-deployed-jira.atlassian: ''
+    spec:
+      project: demo
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+      source:
+        chart: ghcr/vungle/charts/canary-demo
+        repoURL: 320005014399.dkr.ecr.us-east-1.amazonaws.com
+        targetRevision: 'v3.0.0'
+        helm:
+          releaseName: 'canary-demo-{{.name}}'
+          valueFiles:
+            - values.yaml
+          parameters:
+            - name: eksEnv
+              value: '{{ .name }}'
+            - name: image.tag
+              value: "v3.0.0"
+            - name: ticket
+              value: placeholder
+            - name: action
+              value: placeholder
+      destination:
+        server: https://9B17DEB84822825B244F005490E15BB6.gr7.us-east-1.eks.amazonaws.com
+        namespace: canary-demo
+      ignoreDifferences:
+        - group: argoproj.io
+          kind: Rollout
+          jsonPointers:
+            - /spec/replicas

@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: random-success-final
+spec:
+  metrics:
+    - name: random-success
+      # Run the check once (adjust as desired)
+      count: 1
+      failureLimit: 0
+      successCondition: result[0] = 0
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: success-100
+                    image: bash:5.2
+                    command:
+                      - bash
+                      - -c
+                      - |
+                        exit 0
