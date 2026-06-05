@@ -13,6 +13,7 @@ permissions:
   pull-requests: read
 
 env:
+  GHCR_REGISTRY: ghcr.io
   ECR_REPO: vungle/buildx-test
 
 jobs:
@@ -38,6 +39,13 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: "${{ env.GHCR_REGISTRY }}"
+          username: "${{ github.actor }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
@@ -49,7 +57,11 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o cmd/hello/_out/hello_amd64 ./cmd/hello
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o cmd/hello/_out/hello_arm64 ./cmd/hello
 
-      - name: Build and push multi-arch image to ECR
+      - name: Set image tag
+        id: tag
+        run: echo "IMAGE_TAG=test-$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Build and push multi-arch image to GHCR
         uses: docker/build-push-action@v6
         with:
           context: cmd/hello
@@ -57,4 +69,18 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: false
-          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:test-${{ github.sha }}
+          tags: ${{ env.GHCR_REGISTRY }}/${{ github.repository_owner }}/buildx-test:${{ steps.tag.outputs.IMAGE_TAG }}
+
+      - name: Copy multi-arch manifest from GHCR to ECR via skopeo
+        run: |
+          ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          GHCR_IMAGE="${{ env.GHCR_REGISTRY }}/${{ github.repository_owner }}/buildx-test:${{ steps.tag.outputs.IMAGE_TAG }}"
+          ECR_IMAGE="${ECR_REGISTRY}/${{ env.ECR_REPO }}:${{ steps.tag.outputs.IMAGE_TAG }}"
+
+          ECR_TOKEN=$(aws ecr get-login-password --region us-east-1)
+
+          skopeo copy --all \
+            --src-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+            --dest-creds "AWS:${ECR_TOKEN}" \
+            "docker://${GHCR_IMAGE}" \
+            "docker://${ECR_IMAGE}"
