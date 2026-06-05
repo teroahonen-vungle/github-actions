@@ -24,33 +24,8 @@ jobs:
       - name: Check out Repository Code
         uses: actions/checkout@v5
 
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TAILSCALE_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TAILSCALE_SECRET }}
-          tags: tag:dmx-prod
-
-      - name: Get secrets from Vault
-        id: secrets
-        uses: hashicorp/vault-action@v4
-        with:
-          method: jwt
-          path: "jwt/github-action"
-          url: "https://vault.ops.vungle.io"
-          role: "jwt-github-action-vm"
-          exportToken: true
-          exportEnv: false
-          secrets: |
-            cicd/data/vm/github-action DOCKERHUB_TOKEN;
-            cicd/data/vm/github-action DOCKERHUB_USERNAME;
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-
-      - name: Disconnect Tailscale
-        if: always()
-        run: sudo -E tailscale down
 
       - name: Assume github action role
         uses: aws-actions/configure-aws-credentials@v6
