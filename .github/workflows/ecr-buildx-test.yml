@@ -13,8 +13,7 @@ permissions:
   pull-requests: read
 
 env:
-  GHCR_REGISTRY: ghcr.io
-  ECR_REPO: buildx-test
+  ECR_REPO: vungle/buildx-test
 
 jobs:
   build-and-publish:
@@ -35,21 +34,9 @@ jobs:
           mask-aws-account-id: false
           role-session-name: github-actions-ecr
 
-      - name: Ensure ECR repository exists
-        run: |
-          aws ecr describe-repositories --repository-names ${{ env.ECR_REPO }} \
-            || aws ecr create-repository --repository-name ${{ env.ECR_REPO }}
-
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: "${{ env.GHCR_REGISTRY }}"
-          username: "${{ github.actor }}"
-          password: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -62,11 +49,7 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o cmd/hello/_out/hello_amd64 ./cmd/hello
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o cmd/hello/_out/hello_arm64 ./cmd/hello
 
-      - name: Set image tag
-        id: tag
-        run: echo "IMAGE_TAG=test-$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
-
-      - name: Build and push multi-arch image to GHCR
+      - name: Build and push multi-arch image to ECR
         uses: docker/build-push-action@v6
         with:
           context: cmd/hello
@@ -74,10 +57,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           provenance: false
-          tags: ${{ env.GHCR_REGISTRY }}/${{ github.repository_owner }}/buildx-test:${{ steps.tag.outputs.IMAGE_TAG }}
-
-      - name: Copy manifest to ECR via imagetools
-        run: |
-          docker buildx imagetools create \
-            --tag ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ steps.tag.outputs.IMAGE_TAG }} \
-            ${{ env.GHCR_REGISTRY }}/${{ github.repository_owner }}/buildx-test:${{ steps.tag.outputs.IMAGE_TAG }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:test-${{ github.sha }}
