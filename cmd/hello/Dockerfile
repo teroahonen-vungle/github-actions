@@ -1,4 +1,4 @@
-FROM ghcr.io/vungle/alpine:3.19
+FROM alpine:3.19
 ARG TARGETARCH
 
 RUN echo "target arch is ${TARGETARCH}" \
